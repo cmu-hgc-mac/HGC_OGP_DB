@@ -72,9 +72,41 @@ class SurveyProcessor():
             component_params = protomodules_params
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'proto_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3)})
+        
+        #Changes by Paolo:
+        elif comp_type == 'modules':
+            component_params = modules_paramas  # <--- IS THIS CORRECT?  
+            XOffset, YOffset, AngleOff = plotter.get_offsets() # <--- IS THIS CORRECT?  
+            db_upload.update({'module_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3)}) # <--- IS THIS CORRECT?  
+            try:
+                PMoffsets = asyncio.run(self.client.GrabSensorOffsets(modtitle))
+            except:
+                except Exception as e: print(f" Accruacy Plot: An error pulling PM offsets from pg occurred: {e}")
+                print("Accruacy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
+                PMoffsets = [0, 0, 0];
+
+            SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
+            print('Protomodule Offset Info: ', SensorXOffset, SensorYOffset, SensorAngleOff)
+            print('Making Accuracy Plot With:', modtitle, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
+            acc_bytes = make_accuracy_plot(modtitle, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff)    
+
+        ### Alternativley:          This should do all the offset calculations and uploading we need, without my accuracy plot, which is not a priority.
+        """
+        elif comp_type == 'modules':
+            component_params = modules_paramas  
+            XOffset, YOffset, AngleOff = plotter.get_offsets()  
+            db_upload.update({'module_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3)})
+        """
+        ###############
+
         else:
             raise ValueError("Component type not recognized. \
                 Currently only supports baseplates, hexaboards, and protomodules. Please change the directory this file belongs to or add customed component type.")
+            print(f"your component was not a valid type: {comp_type}")
+
+        
+        #THIS CAN GET DELETED V
+        """
         # else:
         #     component_params = others_params
         #     try:
@@ -88,7 +120,9 @@ class SurveyProcessor():
         #     print('Retreived Protomodule Offset Info: ', SensorXOffset, SensorYOffset, SensorAngleOff)
         #     print('Making Accuracy Plot With:', modtitle, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
         #     acc_bytes = make_accuracy_plot(modtitle, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff)
-
+        """
+        #THIS CAN GET DELETED ^
+        
         print("key:", component_params['key'])
 
         im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
