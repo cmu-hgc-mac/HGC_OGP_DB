@@ -214,7 +214,7 @@ class PlotTool:
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
-        PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
+        PositionID, Geometry, density, TrayNo, CompType = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo'], self.meta['comp_type']
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
 
@@ -235,7 +235,7 @@ class PlotTool:
         SlotPin_xy = tuple(trayinfo[f'{SlotPin}_xy'])
 
         FD_points = self.get_FDs()
-
+        
         #! plot the fiducial points (not urgent)
         # plotFD(FD_points, centerxy, centerxy, offsetxy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))        
         
@@ -246,7 +246,7 @@ class PlotTool:
         print("PositionID", PositionID)
         print()
 
-        CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
+        CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID, CompType)
         print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
         print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
@@ -315,7 +315,7 @@ def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple, save=
     #     plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
     #     names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
 
-def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, position):
+def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, position, CompType):
     """Calculate the angle and offset of the sensor from the tray fiducials.
     
     Parameters
@@ -343,7 +343,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     Hole = np.array([holeX, holeY])
     print(f'pinY: {pinY}  &  pinX: {pinX}')
 
-    if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
+    if geometry == 'Full' or geometry == 'Top':    
         print('np.degrees(np.arctan2(pinY,pinX))')
         print(f' arctan(-y/x) : {pinY}/{pinX}')
         if density == 'HD':
@@ -358,6 +358,12 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
                 angle_Pin = np.degrees(np.arctan2(pinY,pinX))
         #print(f' y/x : {pinY/pinX}')
         #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
+    elif geometry == 'Bottom':
+        if density == 'HD':
+            if position == 1:
+                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+            if position == 2:
+                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
 
     elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
         print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
@@ -384,8 +390,104 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
      #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
 
     #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
-    if geometry == 'Full' or geometry == 'Five':
-        adjustmentX = 0; adjustmentY = 0;
+    if CompType == 'protomodules':       
+        if geometry == 'Full' or geometry == 'Five':
+            adjustmentX = 0; adjustmentY = 0;
+        elif geometry == 'Top':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = -9.72; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 9.72; adjustmentY = 0;
+            elif density == 'HD':
+                if position == 1: 
+                    adjustmentX = -8.44; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 8.44; adjustmentY = 0;
+        elif geometry == 'Bottom':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 9.72; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = -9.72; 0; adjustmentY = 0;
+            elif density == 'HD':
+                if position == 1: 
+                    adjustmentX = -16; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 16; adjustmentY =0;
+        elif geometry == 'Right':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = 9.72;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = -9.72;
+            elif density == 'HD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = 6.52 ;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = -6.52;    
+        elif geometry == 'Left':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = -9.72;
+                elif position == 2: 
+                    adjustmentX = 0; 0; adjustmentY = 9.72;
+            elif density == 'HD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = -6.52 ;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = 6.52;   
+            
+
+   
+    elif CompType == 'modules':   
+        if geometry == 'Full' or geometry == 'Five':
+            adjustmentX = 0; adjustmentY = 0;
+        elif geometry == 'Top':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = -8; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 8; adjustmentY = 8;
+            if density == 'HD':
+                if position == 1: 
+                    adjustmentX = -4; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 4; adjustmentY = 8;
+        elif geometry == 'Bottom':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 9; adjustmentY = 8;
+                elif position == 2: 
+                    adjustmentX = -9; adjustmentY = 8;
+            if density == 'HD':
+                if position == 1: 
+                    adjustmentX = -15; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 15; adjustmentY = 0;
+        elif geometry == 'Right':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = 18;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = -18;
+            if density == 'HD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = 5;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = -5;
+        elif geometry == 'Left':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = -18;
+                elif position == 2: 
+                    adjustmentX = 0; 0; adjustmentY = 18;
+            if density == 'HD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = -5;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = 5;
+    
     
     XOffset = FDCenter[0]-Hole[0]-adjustmentX
     YOffset = FDCenter[1]-Hole[1]-adjustmentY
