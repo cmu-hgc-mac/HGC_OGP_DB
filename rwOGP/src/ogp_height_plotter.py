@@ -253,6 +253,246 @@ class PlotTool:
 
         return XOffset, YOffset, AngleOff
 
+    def angle(self, holeXY:tuple, slotXY:tuple, FDPoints:np.array):
+        """Calculate the angle and offset of the sensor from the tray fiducials.
+        
+        Parameters
+        - `holeXY`: the location of the pin that corresponds to the HOLE in the base plate. the center pin for Full, LD/HD.
+        - `slotXY`: the location of the pin that corresponds to the SLOT in the base plate. the offcenter pin for Full, LD/HD.
+        - `FDPoints`: array of fiducial points: 2, 4, 6, or 8, FD points are accepted
+
+        Return
+        - `CenterOffset`: offset of the sensor from the tray center
+        - `AngleOffset`: angle of the sensor from the tray fiducials
+        - `XOffset`: x-offset of the sensor from the tray center
+        - `YOffset`: y-offset of the sensor from the tray center"""
+
+        geometry, density, position, CompType = self.meta['Geometry'], self.meta['Density'], self.meta['PositionID'], self.comp_type
+
+        holeX, holeY = holeXY
+        slotX, slotY = slotXY
+
+        pinX = slotX - holeX     #X component of a vector pointing from hole to slot
+        pinY = slotY - holeY     #Y component "" ""
+
+        Hole = np.array([holeX, holeY])
+        print(f'pinY: {pinY}  &  pinX: {pinX}')
+
+        if geometry == 'Full' or geometry == 'Top':    
+            print('np.degrees(np.arctan2(pinY,pinX))')
+            print(f' arctan(-y/x) : {pinY}/{pinX}')
+            if density == 'HD':
+                if position == 1:
+                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+                if position == 2:
+                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+            if density == 'LD':
+                if position == 1:
+                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+                if position == 2:
+                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+            #print(f' y/x : {pinY/pinX}')
+            #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
+        elif geometry == 'Bottom':
+            if density == 'HD':
+                if position == 1:
+                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+                if position == 2:
+                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+
+        elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
+            print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
+            angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
+            print(f' arctan(x/y) : -{pinY}/-{pinX}')
+        else: print('PlotTool: angle: geometry not recognized')
+
+        print(f'This is angle pin {angle_Pin}')
+        
+        if density == 'HD':   
+            if geometry == 'Full':
+                FDCenter = np.nanmean(FDPoints, axis=0) #Average of All FDs
+            else:
+                FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
+        if density == 'LD':
+            if geometry == 'Full':
+                FDCenter = np.mean(FDPoints[[2,5]], axis=0)
+                #FDCenter_B = np.concatenate((FDPoints[:2], FDPoints[3:4], FDPoints[5:]))
+            else:
+                FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
+        
+        #! It is up to the parsing system and the file output to assign the fiducials correctly  -PJ 1/9/25
+
+        #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
+
+        #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
+        if CompType == 'protomodules':       
+            if geometry == 'Full' or geometry == 'Five':
+                adjustmentX = 0; adjustmentY = 0;
+            elif geometry == 'Top':
+                if density == 'LD':
+                    if position == 1: 
+                        adjustmentX = -9.72; adjustmentY = 0;
+                    elif position == 2: 
+                        adjustmentX = 9.72; adjustmentY = 0;
+                elif density == 'HD':
+                    if position == 1: 
+                        adjustmentX = -8.44; adjustmentY = 0;
+                    elif position == 2: 
+                        adjustmentX = 8.44; adjustmentY = 0;
+            elif geometry == 'Bottom':
+                if density == 'LD':
+                    if position == 1: 
+                        adjustmentX = 9.72; adjustmentY = 0;
+                    elif position == 2: 
+                        adjustmentX = -9.72; 0; adjustmentY = 0;
+                elif density == 'HD':
+                    if position == 1: 
+                        adjustmentX = -16; adjustmentY = 0;
+                    elif position == 2: 
+                        adjustmentX = 16; adjustmentY =0;
+            elif geometry == 'Right':
+                if density == 'LD':
+                    if position == 1: 
+                        adjustmentX = 0; adjustmentY = 9.72;
+                    elif position == 2: 
+                        adjustmentX = 0; adjustmentY = -9.72;
+                elif density == 'HD':
+                    if position == 1: 
+                        adjustmentX = 0; adjustmentY = 6.52 ;
+                    elif position == 2: 
+                        adjustmentX = 0; adjustmentY = -6.52;    
+            elif geometry == 'Left':
+                if density == 'LD':
+                    if position == 1: 
+                        adjustmentX = 0; adjustmentY = -9.72;
+                    elif position == 2: 
+                        adjustmentX = 0; 0; adjustmentY = 9.72;
+                elif density == 'HD':
+                    if position == 1: 
+                        adjustmentX = 0; adjustmentY = -6.52 ;
+                    elif position == 2: 
+                        adjustmentX = 0; adjustmentY = 6.52;   
+    
+        elif CompType == 'modules':   
+            if geometry == 'Full' or geometry == 'Five':
+                adjustmentX = 0; adjustmentY = 0;
+            elif geometry == 'Top':
+                if density == 'LD':
+                    if position == 1: 
+                        adjustmentX = -8; adjustmentY = 0;
+                    elif position == 2: 
+                        adjustmentX = 8; adjustmentY = 8;
+                if density == 'HD':
+                    if position == 1: 
+                        adjustmentX = -4; adjustmentY = 0;
+                    elif position == 2: 
+                        adjustmentX = 4; adjustmentY = 8;
+            elif geometry == 'Bottom':
+                if density == 'LD':
+                    if position == 1: 
+                        adjustmentX = 9; adjustmentY = 8;
+                    elif position == 2: 
+                        adjustmentX = -9; adjustmentY = 8;
+                if density == 'HD':
+                    if position == 1: 
+                        adjustmentX = -15; adjustmentY = 0;
+                    elif position == 2: 
+                        adjustmentX = 15; adjustmentY = 0;
+            elif geometry == 'Right':
+                if density == 'LD':
+                    if position == 1: 
+                        adjustmentX = 0; adjustmentY = 18;
+                    elif position == 2: 
+                        adjustmentX = 0; adjustmentY = -18;
+                if density == 'HD':
+                    if position == 1: 
+                        adjustmentX = 0; adjustmentY = 5;
+                    elif position == 2: 
+                        adjustmentX = 0; adjustmentY = -5;
+            elif geometry == 'Left':
+                if density == 'LD':
+                    if position == 1: 
+                        adjustmentX = 0; adjustmentY = -18;
+                    elif position == 2: 
+                        adjustmentX = 0; 0; adjustmentY = 18;
+                if density == 'HD':
+                    if position == 1: 
+                        adjustmentX = 0; adjustmentY = -5;
+                    elif position == 2: 
+                        adjustmentX = 0; adjustmentY = 5;
+        
+        
+        XOffset = FDCenter[0]-Hole[0]-adjustmentX
+        YOffset = FDCenter[1]-Hole[1]-adjustmentY
+        print()
+        print("Hole Vs FDCenter:")
+        print(Hole)
+        print(FDCenter)
+
+        print(f"Assembly Survey X Offset: {XOffset:.3f} mm. \n")
+        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
+
+        CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
+
+        FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
+        
+        if geometry == 'Bottom' or geometry == 'Top':       #if geometry is Top or bottom, FD3to1 will point either left or right
+            angle_FD3to1 = np.degrees(np.arctan2(FD3to1[1],FD3to1[0]))
+        elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':     #if geometry is Five, Right or Left, FD3to1 will point either up or down
+            angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+        elif geometry == 'Full' and density == 'HD':
+            # in this case angle_FD3to1 is actually the angle of the line that goes from 1 to 2, this points up and down wrt tray
+            if position == 1:
+                FD3to1 = FDPoints[1] - FDPoints[0]
+                print("Angle calculated with FD1 & FD2")
+                #print(FD3to1)
+                angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+            if position == 2:
+                FD3to1 = FDPoints[1] - FDPoints[0]
+                print("Angle calculated with FD1 & FD2")
+                #print(FD3to1)
+                angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
+            
+            #print(FD3to1)
+            #print("angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))")
+            print("Current Angle:", angle_FD3to1)
+
+        elif geometry == 'Full' and density == 'LD':
+            # in this case angle_FD3to1 is actually the angle of the line that goes from 6 to 3, this points up and down wrt tray
+            print("Angle calculated with FD6 & FD3")
+            FD3to1 = FDPoints[2] - FDPoints[5]
+            print("FD3", FDPoints[2], "FD6:", FDPoints[5])
+            if position == 1:
+                #print(FD3to1)
+                angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+            if position == 2:
+                #print(FD3to1)
+                #print(f'Marker -{FD3to1}-')
+                angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
+                #print(f'Marker -{FD3to1}-{np.arctan2(FD3to1[0],FD3to1[1])}-{FD3to1[0], FD3to1[1]}-')
+                #print(angle_FD3to1)
+        else: print('PlotTool: angle: geometry not recognized')
+
+        #print("Vector between selected fiducials", FD3to1)
+        #print('angle angle of selected fiducials:', angle_FD3to1)
+        #print(f' arctan(y/x) : {FD3to1[1]}/{FD3to1[0]}')
+        #print(f' y/x : {FD3to1[1]/FD3to1[0]}')
+        #print(FD3to1[0] , FD3to1[1])
+        #print(np.arctan2(FD3to1[0],FD3to1[1]))
+        #print(np.degrees(np.arctan2(FD3to1[0],FD3to1[1])))
+
+
+
+        #print(f"FD1-2 X'' axis is at angle {angle_FD3to1:.5f} degrees. \n")
+        #print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
+        #print(f"Pin&Hole at x:{holeX:.3f} mm, y:{holeY:.3f} mm")
+
+        AngleOffset = angle_FD3to1 - angle_Pin
+
+        print(f'Angle offset: {AngleOffset},  Pin Angle: {angle_Pin} ')
+
+        return CenterOffset, AngleOffset, XOffset, YOffset
+
 def vec_angle(x,y):
     angle_arctan = np.degrees(np.arctan2(y,x))
     return angle_arctan
@@ -314,245 +554,7 @@ def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple, save=
     #     plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
     #     names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
     
-def angle(self, holeXY:tuple, slotXY:tuple, FDPoints:np.array):
-    """Calculate the angle and offset of the sensor from the tray fiducials.
-    
-    Parameters
-    - `holeXY`: the location of the pin that corresponds to the HOLE in the base plate. the center pin for Full, LD/HD.
-    - `slotXY`: the location of the pin that corresponds to the SLOT in the base plate. the offcenter pin for Full, LD/HD.
-    - `FDPoints`: array of fiducial points: 2, 4, 6, or 8, FD points are accepted
 
-    Return
-    - `CenterOffset`: offset of the sensor from the tray center
-    - `AngleOffset`: angle of the sensor from the tray fiducials
-    - `XOffset`: x-offset of the sensor from the tray center
-    - `YOffset`: y-offset of the sensor from the tray center"""
-
-    geometry, density, position, CompType = self.meta['Geometry'], self.meta['Density'], self.meta['PositionID'], self.comp_type
-
-    holeX, holeY = holeXY
-    slotX, slotY = slotXY
-
-    pinX = slotX - holeX     #X component of a vector pointing from hole to slot
-    pinY = slotY - holeY     #Y component "" ""
-
-    Hole = np.array([holeX, holeY])
-    print(f'pinY: {pinY}  &  pinX: {pinX}')
-
-    if geometry == 'Full' or geometry == 'Top':    
-        print('np.degrees(np.arctan2(pinY,pinX))')
-        print(f' arctan(-y/x) : {pinY}/{pinX}')
-        if density == 'HD':
-            if position == 1:
-                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-            if position == 2:
-                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-        if density == 'LD':
-            if position == 1:
-                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-            if position == 2:
-                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-        #print(f' y/x : {pinY/pinX}')
-        #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
-    elif geometry == 'Bottom':
-        if density == 'HD':
-            if position == 1:
-                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-            if position == 2:
-                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-
-    elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
-        print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
-        angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
-        print(f' arctan(x/y) : -{pinY}/-{pinX}')
-    else: print('PlotTool: angle: geometry not recognized')
-
-    print(f'This is angle pin {angle_Pin}')
-    
-    if density == 'HD':   
-        if geometry == 'Full':
-            FDCenter = np.nanmean(FDPoints, axis=0) #Average of All FDs
-        else:
-            FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
-    if density == 'LD':
-        if geometry == 'Full':
-            FDCenter = np.mean(FDPoints[[2,5]], axis=0)
-            #FDCenter_B = np.concatenate((FDPoints[:2], FDPoints[3:4], FDPoints[5:]))
-        else:
-            FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
-    
-     #! It is up to the parsing system and the file output to assign the fiducials correctly  -PJ 1/9/25
-
-     #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
-
-    #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
-    if CompType == 'protomodules':       
-        if geometry == 'Full' or geometry == 'Five':
-            adjustmentX = 0; adjustmentY = 0;
-        elif geometry == 'Top':
-            if density == 'LD':
-                if position == 1: 
-                    adjustmentX = -9.72; adjustmentY = 0;
-                elif position == 2: 
-                    adjustmentX = 9.72; adjustmentY = 0;
-            elif density == 'HD':
-                if position == 1: 
-                    adjustmentX = -8.44; adjustmentY = 0;
-                elif position == 2: 
-                    adjustmentX = 8.44; adjustmentY = 0;
-        elif geometry == 'Bottom':
-            if density == 'LD':
-                if position == 1: 
-                    adjustmentX = 9.72; adjustmentY = 0;
-                elif position == 2: 
-                    adjustmentX = -9.72; 0; adjustmentY = 0;
-            elif density == 'HD':
-                if position == 1: 
-                    adjustmentX = -16; adjustmentY = 0;
-                elif position == 2: 
-                    adjustmentX = 16; adjustmentY =0;
-        elif geometry == 'Right':
-            if density == 'LD':
-                if position == 1: 
-                    adjustmentX = 0; adjustmentY = 9.72;
-                elif position == 2: 
-                    adjustmentX = 0; adjustmentY = -9.72;
-            elif density == 'HD':
-                if position == 1: 
-                    adjustmentX = 0; adjustmentY = 6.52 ;
-                elif position == 2: 
-                    adjustmentX = 0; adjustmentY = -6.52;    
-        elif geometry == 'Left':
-            if density == 'LD':
-                if position == 1: 
-                    adjustmentX = 0; adjustmentY = -9.72;
-                elif position == 2: 
-                    adjustmentX = 0; 0; adjustmentY = 9.72;
-            elif density == 'HD':
-                if position == 1: 
-                    adjustmentX = 0; adjustmentY = -6.52 ;
-                elif position == 2: 
-                    adjustmentX = 0; adjustmentY = 6.52;   
-   
-    elif CompType == 'modules':   
-        if geometry == 'Full' or geometry == 'Five':
-            adjustmentX = 0; adjustmentY = 0;
-        elif geometry == 'Top':
-            if density == 'LD':
-                if position == 1: 
-                    adjustmentX = -8; adjustmentY = 0;
-                elif position == 2: 
-                    adjustmentX = 8; adjustmentY = 8;
-            if density == 'HD':
-                if position == 1: 
-                    adjustmentX = -4; adjustmentY = 0;
-                elif position == 2: 
-                    adjustmentX = 4; adjustmentY = 8;
-        elif geometry == 'Bottom':
-            if density == 'LD':
-                if position == 1: 
-                    adjustmentX = 9; adjustmentY = 8;
-                elif position == 2: 
-                    adjustmentX = -9; adjustmentY = 8;
-            if density == 'HD':
-                if position == 1: 
-                    adjustmentX = -15; adjustmentY = 0;
-                elif position == 2: 
-                    adjustmentX = 15; adjustmentY = 0;
-        elif geometry == 'Right':
-            if density == 'LD':
-                if position == 1: 
-                    adjustmentX = 0; adjustmentY = 18;
-                elif position == 2: 
-                    adjustmentX = 0; adjustmentY = -18;
-            if density == 'HD':
-                if position == 1: 
-                    adjustmentX = 0; adjustmentY = 5;
-                elif position == 2: 
-                    adjustmentX = 0; adjustmentY = -5;
-        elif geometry == 'Left':
-            if density == 'LD':
-                if position == 1: 
-                    adjustmentX = 0; adjustmentY = -18;
-                elif position == 2: 
-                    adjustmentX = 0; 0; adjustmentY = 18;
-            if density == 'HD':
-                if position == 1: 
-                    adjustmentX = 0; adjustmentY = -5;
-                elif position == 2: 
-                    adjustmentX = 0; adjustmentY = 5;
-    
-    
-    XOffset = FDCenter[0]-Hole[0]-adjustmentX
-    YOffset = FDCenter[1]-Hole[1]-adjustmentY
-    print()
-    print("Hole Vs FDCenter:")
-    print(Hole)
-    print(FDCenter)
-
-    print(f"Assembly Survey X Offset: {XOffset:.3f} mm. \n")
-    print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
-
-    CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
-
-    FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
-    
-    if geometry == 'Bottom' or geometry == 'Top':       #if geometry is Top or bottom, FD3to1 will point either left or right
-        angle_FD3to1 = np.degrees(np.arctan2(FD3to1[1],FD3to1[0]))
-    elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':     #if geometry is Five, Right or Left, FD3to1 will point either up or down
-        angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
-    elif geometry == 'Full' and density == 'HD':
-        # in this case angle_FD3to1 is actually the angle of the line that goes from 1 to 2, this points up and down wrt tray
-        if position == 1:
-            FD3to1 = FDPoints[1] - FDPoints[0]
-            print("Angle calculated with FD1 & FD2")
-            #print(FD3to1)
-            angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
-        if position == 2:
-            FD3to1 = FDPoints[1] - FDPoints[0]
-            print("Angle calculated with FD1 & FD2")
-            #print(FD3to1)
-            angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
-        
-        #print(FD3to1)
-        #print("angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))")
-        print("Current Angle:", angle_FD3to1)
-
-    elif geometry == 'Full' and density == 'LD':
-        # in this case angle_FD3to1 is actually the angle of the line that goes from 6 to 3, this points up and down wrt tray
-        print("Angle calculated with FD6 & FD3")
-        FD3to1 = FDPoints[2] - FDPoints[5]
-        print("FD3", FDPoints[2], "FD6:", FDPoints[5])
-        if position == 1:
-            #print(FD3to1)
-            angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
-        if position == 2:
-            #print(FD3to1)
-            #print(f'Marker -{FD3to1}-')
-            angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
-            #print(f'Marker -{FD3to1}-{np.arctan2(FD3to1[0],FD3to1[1])}-{FD3to1[0], FD3to1[1]}-')
-            #print(angle_FD3to1)
-    else: print('PlotTool: angle: geometry not recognized')
-
-    #print("Vector between selected fiducials", FD3to1)
-    #print('angle angle of selected fiducials:', angle_FD3to1)
-    #print(f' arctan(y/x) : {FD3to1[1]}/{FD3to1[0]}')
-    #print(f' y/x : {FD3to1[1]/FD3to1[0]}')
-    #print(FD3to1[0] , FD3to1[1])
-    #print(np.arctan2(FD3to1[0],FD3to1[1]))
-    #print(np.degrees(np.arctan2(FD3to1[0],FD3to1[1])))
-
-
-
-    #print(f"FD1-2 X'' axis is at angle {angle_FD3to1:.5f} degrees. \n")
-    #print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
-    #print(f"Pin&Hole at x:{holeX:.3f} mm, y:{holeY:.3f} mm")
-
-    AngleOffset = angle_FD3to1 - angle_Pin
-
-    print(f'Angle offset: {AngleOffset},  Pin Angle: {angle_Pin} ')
-
-    return CenterOffset, AngleOffset, XOffset, YOffset
 
 def quality(Center, Rotation, position = "P1", details =0, note = 0):
     '''
