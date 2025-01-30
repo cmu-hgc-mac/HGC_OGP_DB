@@ -16,75 +16,46 @@ classify = {'-1': 'NO INFO',
                          '0': 'GREEN',
                          '1': 'YELLOW',
                          '2': 'RED'}
+
 degrees = [0.03, 0.06, 90]
 centers = [0.050, 0.100, 10.0]
 
 pin_mapping = {
-    'Full': {
-        'LD': {
-            1: ('p1_center_pin', 'p1O'),
-            2: ('p2_center_pin', 'p2M')
-        },
-        'HD': {
-            1: ('p1_center_pin', 'p1O'),
-            2: ('p2_center_pin', 'p2M')
-        }
+    'Full': {'LD': {1: ('p1_center_pin', 'p1O'), 2: ('p2_center_pin', 'p2M')},
+             'HD': {1: ('p1_center_pin', 'p1O'), 2: ('p2_center_pin', 'p2M')}},
+    'Left': {'LD': {1: ('p1C', 'p1I'), 2: ('p2A', 'p2K')},
+             'HD': {1: ('p1F', 'p1P'), 2: ('p2H', 'p2N')}},
+    'Right': {'LD': {1: ('p1A', 'p1K'), 2: ('p2C', 'p2I')},
+              'HD': {1: ('p1H', 'p1N'), 2: ('p2F', 'p2P')}},
+    'Top': {'LD': {1: ('p1D', 'p1O'), 2: ('p2B', 'p2M')},
+            'HD': {1: ('p1E', 'p1O'), 2: ('p2G', 'p2M')}},
+    'Bottom': {'LD': {1: ('p1B', 'p1M'), 2: ('p2D', 'p2O')},
+               'HD': {1: ('p1_center_pin', 'p1M'), 2: ('p2_center_pin', 'p2O')}},
+    'Five': {'LD': {1: ('p1_center_pin', 'p1I'), 2: ('p2_center_pin', 'p2K')},
+             'HD': {1: ('p1_center_pin', 'p1I'), 2: ('p2_center_pin', 'p2K')}}
+}
+
+ADJUSTMENTS = {
+    'protomodules': {
+        'Full':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
+        'Five':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
+        'Top':    {'LD': {1: (-9.72, 0),  2: (9.72, 0)},   'HD': {1: (-8.44, 0),   2: (8.44, 0)}},
+        'Bottom': {'LD': {1: (9.72, 0),   2: (-9.72, 0)},  'HD': {1: (-16, 0),     2: (16, 0)}},
+        'Right':  {'LD': {1: (0, 9.72),   2: (0, -9.72)},  'HD': {1: (0, 6.52),    2: (0, -6.52)}},
+        'Left':   {'LD': {1: (0, -9.72),  2: (0, 9.72)},   'HD': {1: (0, -6.52),   2: (0, 6.52)}}
     },
-    'Left': {
-        'LD': {
-            1: ('p1C', 'p1I'),
-            2: ('p2A', 'p2K')
-        },
-        'HD': {
-            1: ('p1F', 'p1P'),
-            2: ('p2H', 'p2N')
-        }
-    },
-    'Right': {
-        'LD': {
-            1: ('p1A', 'p1K'),
-            2: ('p2C', 'p2I')
-        },
-        'HD': {
-            1: ('p1H', 'p1N'),
-            2: ('p2F', 'p2P')
-        }
-    },
-    'Top': {
-        'LD': {
-            1: ('p1D', 'p1O'),
-            2: ('p2B', 'p2M')
-        },
-        'HD': {
-            1: ('p1E', 'p1O'),
-            2: ('p2G', 'p2M')
-        }
-    },
-    'Bottom': {
-        'LD': {
-            1: ('p1B', 'p1M'),
-            2: ('p2D', 'p2O')
-        },
-        'HD': {
-            1: ('p1_center_pin', 'p1M'),
-            2: ('p2_center_pin', 'p2O')
-        }
-    },
-    'Five': {
-        'LD': {
-            1: ('p1_center_pin', 'p1I'),
-            2: ('p2_center_pin', 'p2K')
-        },
-        'HD': {
-            1: ('p1_center_pin', 'p1I'),
-            2: ('p2_center_pin', 'p2K')
-        }
+    'modules': {
+        'Full':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
+        'Five':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
+        'Top':    {'LD': {1: (-8, 0),     2: (8, 8)},      'HD': {1: (-4, 0),      2: (4, 8)}},
+        'Bottom': {'LD': {1: (9, 8),      2: (-9, 8)},     'HD': {1: (-15, 0),     2: (15, 0)}},
+        'Right':  {'LD': {1: (0, 18),     2: (0, -18)},    'HD': {1: (0, 5),       2: (0, -5)}},
+        'Left':   {'LD': {1: (0, -18),    2: (0, 18)},     'HD': {1: (0, -5),      2: (0, 5)}}
     }
 }
 
-# If the following keys are missing from the header, an error will be raised
+# DataParser looks for these keys in the metadata
 required_keys = ['TrayNo', 'ComponentID', 'Operator', 'Geometry', 'Density', 'Flatness', 'PositionID']
-# If the following keys are missing from the header, a warning will be raised
 warning_keys = ['Thickness', 'SensorSize']
 
 header_template = """

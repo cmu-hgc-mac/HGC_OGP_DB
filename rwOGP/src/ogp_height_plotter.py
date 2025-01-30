@@ -5,7 +5,7 @@ import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import pin_mapping
+from src.param import pin_mapping, ADJUSTMENTS
 
 pjoin = os.path.join
 
@@ -323,104 +323,7 @@ class PlotTool:
         #! It is up to the parsing system and the file output to assign the fiducials correctly  -PJ 1/9/25
 
         #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
-
-        #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
-        if CompType == 'protomodules':       
-            if geometry == 'Full' or geometry == 'Five':
-                adjustmentX = 0; adjustmentY = 0;
-            elif geometry == 'Top':
-                if density == 'LD':
-                    if position == 1: 
-                        adjustmentX = -9.72; adjustmentY = 0;
-                    elif position == 2: 
-                        adjustmentX = 9.72; adjustmentY = 0;
-                elif density == 'HD':
-                    if position == 1: 
-                        adjustmentX = -8.44; adjustmentY = 0;
-                    elif position == 2: 
-                        adjustmentX = 8.44; adjustmentY = 0;
-            elif geometry == 'Bottom':
-                if density == 'LD':
-                    if position == 1: 
-                        adjustmentX = 9.72; adjustmentY = 0;
-                    elif position == 2: 
-                        adjustmentX = -9.72; 0; adjustmentY = 0;
-                elif density == 'HD':
-                    if position == 1: 
-                        adjustmentX = -16; adjustmentY = 0;
-                    elif position == 2: 
-                        adjustmentX = 16; adjustmentY =0;
-            elif geometry == 'Right':
-                if density == 'LD':
-                    if position == 1: 
-                        adjustmentX = 0; adjustmentY = 9.72;
-                    elif position == 2: 
-                        adjustmentX = 0; adjustmentY = -9.72;
-                elif density == 'HD':
-                    if position == 1: 
-                        adjustmentX = 0; adjustmentY = 6.52 ;
-                    elif position == 2: 
-                        adjustmentX = 0; adjustmentY = -6.52;    
-            elif geometry == 'Left':
-                if density == 'LD':
-                    if position == 1: 
-                        adjustmentX = 0; adjustmentY = -9.72;
-                    elif position == 2: 
-                        adjustmentX = 0; 0; adjustmentY = 9.72;
-                elif density == 'HD':
-                    if position == 1: 
-                        adjustmentX = 0; adjustmentY = -6.52 ;
-                    elif position == 2: 
-                        adjustmentX = 0; adjustmentY = 6.52;   
-    
-        elif CompType == 'modules':   
-            if geometry == 'Full' or geometry == 'Five':
-                adjustmentX = 0; adjustmentY = 0;
-            elif geometry == 'Top':
-                if density == 'LD':
-                    if position == 1: 
-                        adjustmentX = -8; adjustmentY = 0;
-                    elif position == 2: 
-                        adjustmentX = 8; adjustmentY = 8;
-                if density == 'HD':
-                    if position == 1: 
-                        adjustmentX = -4; adjustmentY = 0;
-                    elif position == 2: 
-                        adjustmentX = 4; adjustmentY = 8;
-            elif geometry == 'Bottom':
-                if density == 'LD':
-                    if position == 1: 
-                        adjustmentX = 9; adjustmentY = 8;
-                    elif position == 2: 
-                        adjustmentX = -9; adjustmentY = 8;
-                if density == 'HD':
-                    if position == 1: 
-                        adjustmentX = -15; adjustmentY = 0;
-                    elif position == 2: 
-                        adjustmentX = 15; adjustmentY = 0;
-            elif geometry == 'Right':
-                if density == 'LD':
-                    if position == 1: 
-                        adjustmentX = 0; adjustmentY = 18;
-                    elif position == 2: 
-                        adjustmentX = 0; adjustmentY = -18;
-                if density == 'HD':
-                    if position == 1: 
-                        adjustmentX = 0; adjustmentY = 5;
-                    elif position == 2: 
-                        adjustmentX = 0; adjustmentY = -5;
-            elif geometry == 'Left':
-                if density == 'LD':
-                    if position == 1: 
-                        adjustmentX = 0; adjustmentY = -18;
-                    elif position == 2: 
-                        adjustmentX = 0; 0; adjustmentY = 18;
-                if density == 'HD':
-                    if position == 1: 
-                        adjustmentX = 0; adjustmentY = -5;
-                    elif position == 2: 
-                        adjustmentX = 0; adjustmentY = 5;
-        
+        adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
         
         XOffset = FDCenter[0]-Hole[0]-adjustmentX
         YOffset = FDCenter[1]-Hole[1]-adjustmentY
