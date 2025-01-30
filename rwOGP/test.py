@@ -20,7 +20,7 @@ if __name__ == '__main__':
         metadata = yaml.safe_load(f)
 
     feature_df = pd.read_csv(features[0])
-    PT = PlotTool(metadata, feature_df, 'rwOGP/templates/trays', 'tests')
+    PT = PlotTool(metadata, "modules", feature_df, 'rwOGP/templates/trays', 'tests')
     
     im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
