@@ -8,21 +8,6 @@ comptable = {'baseplate':{'prefix': 'bp'},'hexaboard':{'prefix': 'hxb'},'protomo
 
 default_params = {"PositionID": 1, "Geometry": "Full", "Density": "LD", "TrayNo": 1}
 
-one_tray_param = {
-            'P1Center.X': 142.648,
-            'P1Center.Y': 298.465,
-            'P2Center.X': 91.899,
-            'P2Center.Y': 107.959,
-            'P1LEFT.X': 67.688,
-            'P1LEFT.Y': 298.445,
-            'P2LEFT.X': 16.949,
-            'P2LEFT.Y': 107.939,
-            'P1RIGHT.X': 217.585,
-            'P1RIGHT.Y': 298.455,
-            'P2RIGHT.X': 166.848,
-            'P2RIGHT.Y': 107.969,
-        }
-
 colorClassify = {'-1': Fore.MAGENTA + 'NO INFO' + Fore.BLACK, 
                        '0': Fore.GREEN + 'GREEN' + Fore.BLACK,
                        '1': Fore.YELLOW + 'YELLOW' + Fore.BLACK, 

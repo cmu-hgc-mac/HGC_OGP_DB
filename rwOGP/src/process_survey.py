@@ -58,7 +58,7 @@ class SurveyProcessor():
         modtitle = metadata['ComponentID']
 
         df = pd.read_csv(ex_file)
-        plotter = PlotTool(metadata, df, self.tray_dir, pjoin(self.im_dir, comp_type))
+        plotter = PlotTool(metadata, comp_type, df, self.tray_dir, pjoin(self.im_dir, comp_type))
 
         filesuffix = pbase(ex_file).split('.')[0]
 
