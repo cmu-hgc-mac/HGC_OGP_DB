@@ -543,19 +543,6 @@ def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple, save=
     if save:
         plt.savefig(save_name)
         
-
-#! Messy part: serve as reference for future development
-    # if FDpoints == 2:
-    #     plt.arrow(Xp[2],Yp[2],Xp[3]-Xp[2],Yp[3]-Yp[2],lw=0.5,color='orange')
-
-    # if FDpoints == 4:
-    #     plt.arrow(Xp[2],Yp[2],Xp[4]-Xp[2],Yp[4]-Yp[2],lw=0.5,color='orange')
-    #     plt.arrow(Xp[3],Yp[3],Xp[5]-Xp[3],Yp[5]-Yp[3],lw=0.5,color='orange')
-    #     plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
-    #     names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
-    
-
-
 def quality(Center, Rotation, position = "P1", details =0, note = 0):
     '''
     QC designation for different measurements
