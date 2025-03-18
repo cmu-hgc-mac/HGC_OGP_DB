@@ -4,6 +4,9 @@ import os, re, yaml, sys
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
+from rich.console import Console
+from rich.table import Table
+from rich import print as rprint
 from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_CALC_CONFIG
 
 pjoin = os.path.join
@@ -13,6 +16,75 @@ class ValueMissingError(Exception):
 
 class ValueRangeError(Exception):
     pass
+
+class MeasurementResults:
+    def __init__(self):
+        self.console = Console()
+        self.fiducial_points = []
+        self.pin_info = []
+        self.offsets = []
+        self.height_stats = []
+
+    def add_fiducial(self, fd_number, x, y):
+        self.fiducial_points.append([f'FD{fd_number}', f'{x:.3f}', f'{y:.3f}'])
+
+    def add_pin(self, pin_type, x, y, description):
+        self.pin_info.append([pin_type, f'{x:.3f}', f'{y:.3f}', description])
+
+    def add_offset(self, measurement, value, unit):
+        self.offsets.append([measurement, f'{value:.3f}', unit])
+
+    def add_height_stat(self, measurement, value, unit='mm'):
+        self.height_stats.append([measurement, f'{value:.3f}', unit])
+
+    def display(self):
+        # Fiducial Points Table
+        if self.fiducial_points:
+            rprint("[bold blue]Fiducial Points:[/bold blue]")
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("FD Number", style="cyan")
+            table.add_column("X (mm)", style="green")
+            table.add_column("Y (mm)", style="green")
+            for row in self.fiducial_points:
+                table.add_row(*row)
+            self.console.print(table)
+            print()  # Add a newline
+
+        # Pin Information Table
+        if self.pin_info:
+            rprint("[bold blue]Pin Information:[/bold blue]")
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("Pin Type", style="cyan")
+            table.add_column("X (mm)", style="green")
+            table.add_column("Y (mm)", style="green")
+            table.add_column("Description", style="yellow")
+            for row in self.pin_info:
+                table.add_row(*row)
+            self.console.print(table)
+            print()  # Add a newline
+
+        # Offsets Table
+        if self.offsets:
+            rprint("[bold blue]Measurement Offsets:[/bold blue]")
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("Measurement", style="cyan")
+            table.add_column("Value", style="green")
+            table.add_column("Unit", style="yellow")
+            for row in self.offsets:
+                table.add_row(*row)
+            self.console.print(table)
+            print()  # Add a newline
+
+        # Height Statistics Table
+        if self.height_stats:
+            rprint("[bold blue]Height Statistics:[/bold blue]")
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("Measurement", style="cyan")
+            table.add_column("Value", style="green")
+            table.add_column("Unit", style="yellow")
+            for row in self.height_stats:
+                table.add_row(*row)
+            self.console.print(table)
 
 class PlotTool:
     def __init__(self, meta, component_type, features: 'pd.DataFrame', tray_dir, save_dir=None):
@@ -31,12 +103,13 @@ class PlotTool:
         self.x_points = self.features['X_coordinate']
         self.y_points = self.features['Y_coordinate']
         self.z_points = self.features['Z_coordinate']
+        self.results = MeasurementResults()
 
         self.__check_save_dir()
     
     def __call__(self, **args):
         """Plot the 2D height map of the given data."""
-        centerxy = self.get_center()
+        centerxy = self.get_center_for_plot()
         im_bytes = self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **args)
         return im_bytes
      
@@ -47,7 +120,7 @@ class PlotTool:
                 print("Creating save directory:", self.save_dir)
                 os.makedirs(self.save_dir)
     
-    def get_center(self) -> int:
+    def get_center_for_plot(self) -> int:
         """Get the index of the fiducial center in the dataframe by taking the average of the x and y coordinates."""
         center_x = (max(self.x_points) + min(self.x_points)) / 2
         center_y = (max(self.y_points) + min(self.y_points)) / 2
