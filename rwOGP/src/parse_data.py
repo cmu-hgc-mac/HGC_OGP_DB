@@ -57,6 +57,7 @@ class DataParser():
         gen_features = []
         logging.info("=== Parsing OGP Data ===")
         for filename in self.data_file:
+            self.header_results = {}
             with open(filename, 'r') as f:
                 self.data = f.read()
             logging.info(f"Parsing data file: {pbase(filename)}")
@@ -67,7 +68,11 @@ class DataParser():
                     f.write(self.data)
             
             self.read_temp_sep()
-            output_filename = self.output_meta()
+            try:
+                output_filename = self.output_meta()
+            except ParserKeyException as e:
+                logging.error(f"Error in parsing metadata: {e} for {filename}")
+                continue
             self.output_features(f'{output_filename}.csv')
 
             gen_features.append(pjoin(self.output_dir, f'{output_filename}.csv'))
