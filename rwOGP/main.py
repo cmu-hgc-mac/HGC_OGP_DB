@@ -1,5 +1,6 @@
 import os, yaml, sys, asyncio, logging
-from rich_argparse import RichArgumentParser
+import argparse
+from rich_argparse import RichHelpFormatter
 
 pjoin = os.path.join
 
@@ -42,21 +43,20 @@ async def main_func(comp_type):
     await updater()
 
 if __name__ == "__main__":
-    parser = RichArgumentParser(
+    parser = argparse.ArgumentParser(
         description=program_descriptions,
         prog="OGP Auto Uploader",
-        epilog="For more information, visit the documentation."
+        formatter_class=RichHelpFormatter
     )
 
-    parser.add_arguments(
-        ("--print", {"action": 'store_true', "help": "[cyan]Print the current inventory.[/]"}),
-        ("--clear", {"action": 'store_true', "help": "[yellow]Clear the current inventory.[/] Note that these do not delete the OGP output files. They only remove the files from being marked as uploaded in the inventory."}),
-        ("--updatedb", {"action": 'store_true', "help": "[green]Update the credentials in the configuration file.[/]"}),
-        ("--updatedir", {"action": 'store_true', "help": "[green]Update the directory paths for OGP outputs/processing in the configuration file.[/]"}),
-        ("--type", {"type": str, "default": '', "help": "[blue]Specify the type of component to process and upload.[/] If not specified, all components will be processed."}),
-        ("--debug", {"action": 'store_true', "help": "[red]Print debug messages.[/]"}),
-        ("--disable", {"action": 'store_true', "help": "[red]Disable the program from uploading.[/]"})
-    )
+    parser.add_argument("--print", action='store_true', help="Print the current inventory.")
+    parser.add_argument("--clear", action='store_true', help="Clear the current inventory. Note that these do not delete the OGP output files. They only remove the files from being marked as uploaded in the inventory.")
+    parser.add_argument("--updatedb", action='store_true', help="Update the credentials in the configuration file.")
+    parser.add_argument("--updatedir", action='store_true', help="Update the directory paths for OGP outputs/processing in the configuration file.")
+    parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload. If not specified, all components will be processed.")
+    parser.add_argument("--debug", action='store_true', help="Print debug messages.")
+    parser.add_argument("--disable", action='store_true', help="Disable the program from uploading.")
+
     args = parser.parse_args()
 
     if args.debug:
