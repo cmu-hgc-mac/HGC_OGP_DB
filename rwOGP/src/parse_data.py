@@ -238,7 +238,7 @@ class DataParser():
     def check_types(self, header_dict):
         """If the data types in header_dict are not correct, convert the types to the correct ones."""
         header_dict['PositionID'] = int(header_dict['PositionID'])
-        header_dict['TrayNo'] = int(header_dict['TrayNo'])
+        # header_dict['TrayNo'] = int(header_dict['TrayNo'])
         header_dict['Density'] = str(header_dict['Density']).upper()
         header_dict['Geometry'] = str(header_dict['Geometry']).capitalize()
         header_dict['Flatness'] = float(header_dict['Flatness'])
