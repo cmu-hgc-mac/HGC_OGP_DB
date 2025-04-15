@@ -373,13 +373,13 @@ class PlotTool:
         position_id = meta['PositionID']
         geometry = meta['Geometry']
         density = meta['Density']
-        tray_no = meta['TrayNo']
-        tray_file = pjoin(tray_dir, f"Tray{tray_no}.yaml")
-        logging.debug(f"Using Tray {tray_no} info...")
+        tray_id = meta['TrayNo']
+        tray_file = pjoin(tray_dir, f"{tray_id}.yaml")
+        logging.debug(f"Using Tray {tray_id} info in {tray_dir}...")
         logging.debug(f"Geometry: {geometry}; Density: {density}; PositionID: {position_id}")
 
         with open(tray_file, 'r') as f:
-                trayinfo = yaml.safe_load(f)
+            trayinfo = yaml.safe_load(f)
 
         hole_pin, slot_pin = pin_mapping.get(geometry, {}).get(density, {}).get(position_id, ('', ''))
 
