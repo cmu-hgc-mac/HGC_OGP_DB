@@ -138,7 +138,7 @@ class SurveyProcessor():
                 return False, last_successful_index
             self.print_db_msg(comp_type, compID)
             status = await self.client.link_and_update_table(comp_params, db_upload)
-            status = await self.client.upload_PostgreSQL(comp_params, db_upload)
+            # status = await self.client.upload_PostgreSQL(comp_params, db_upload)
             if status == False:
                 logging.error("No more uploading will be done due to the error. Please double check the data and try again.")
                 return False, last_successful_index
