@@ -154,11 +154,12 @@ class DBClient():
             status = await conn.fetchval(prequery, name)
             if not status:
                 logging.warning(f"Component {name} not found in the mother table {comp_params['mother_table']}.")
-                return False
+                await self.upload_PostgreSQL(comp_params, db_upload_data)
+                logging.info(f"Component {name} uploaded without linking to the mother table.")
             else:
                 await conn.execute(query, *values)
-                logging.info('Data successfully uploaded and linked to the mother table!')
-                return True
+                logging.info('Data successfully uploaded!')
+            return True
         except Exception as e:
             logging.error(f"Error encountered when linking to the mother table: {e}")
             return False

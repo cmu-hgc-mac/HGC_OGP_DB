@@ -347,7 +347,38 @@ class PlotTool:
             console.print(table)
 
         return FD_array
+    
+    @staticmethod
+    def _get_tray_file(tray_id: str, tray_dir: str) -> str:
+        """Get the tray file path based on the tray ID.
 
+        Args:
+            tray_id: The ID of the tray
+            tray_dir: Directory containing tray files
+
+        Returns:
+            Path to the tray file
+
+        Raises:
+            ValueError: If TrayNo is not in metadata
+        """
+        if not tray_id:
+            raise ValueError("TrayNo not found in metadata")
+
+        # Check if tray_id follows the naming convention
+        has_proper_format = '_' in str(tray_id)
+
+        if not has_proper_format:
+            logging.warning(
+                f"Tray ID '{tray_id}' does not follow the recommended naming convention: "
+                "[INSTITUTION_NAME]_[LD/HD]_[GEOMETRY]_[NO].yaml"
+            )
+            filename = f"Tray{tray_id}.yaml"
+        else:
+            filename = f"{tray_id}.yaml"
+
+        return pjoin(tray_dir, filename)
+            
     def get_pin_coordinates(self):
         """Get the coordinates of the hole and slot pins from the tray file.
 
@@ -373,13 +404,16 @@ class PlotTool:
         position_id = meta['PositionID']
         geometry = meta['Geometry']
         density = meta['Density']
-        tray_no = meta['TrayNo']
-        tray_file = pjoin(tray_dir, f"Tray{tray_no}.yaml")
-        logging.debug(f"Using Tray {tray_no} info...")
+        # Check if TrayNo exists in meta
+
+        tray_id = meta.get('TrayNo', None)
+        tray_file = self._get_tray_file(tray_id, tray_dir)
+    
+        logging.debug(f"Using Tray {tray_id} info in {tray_dir}...")
         logging.debug(f"Geometry: {geometry}; Density: {density}; PositionID: {position_id}")
 
         with open(tray_file, 'r') as f:
-                trayinfo = yaml.safe_load(f)
+            trayinfo = yaml.safe_load(f)
 
         hole_pin, slot_pin = pin_mapping.get(geometry, {}).get(density, {}).get(position_id, ('', ''))
 

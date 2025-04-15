@@ -5,6 +5,7 @@ from io import StringIO
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+from rich.table import Table
 from src.param import default_params, pin_mapping
 from src.parser_template import header_template, data_template, required_keys, warning_keys
 
@@ -57,6 +58,7 @@ class DataParser():
         gen_features = []
         logging.info("=== Parsing OGP Data ===")
         for filename in self.data_file:
+            self.header_results = {}
             with open(filename, 'r') as f:
                 self.data = f.read()
             logging.info(f"Parsing data file: {pbase(filename)}")
@@ -67,7 +69,11 @@ class DataParser():
                     f.write(self.data)
             
             self.read_temp_sep()
-            output_filename = self.output_meta()
+            try:
+                output_filename = self.output_meta()
+            except ParserKeyException as e:
+                logging.error(f"Error in parsing metadata: {e} for {filename}")
+                continue
             self.output_features(f'{output_filename}.csv')
 
             gen_features.append(pjoin(self.output_dir, f'{output_filename}.csv'))
@@ -144,11 +150,25 @@ class DataParser():
                     for key in missing_keys:
                         value = input(f"Enter value for {key}: ")
                         header_dict[key] = value
+            elif logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
+                success_text = Text()
+                success_text.append(f"All required keys detected for {header_dict['ComponentID']}!\n", style="green")
+
+                # Create table data
+                table_data = [[key, str(value)] for key, value in header_dict.items()]
+                table = Table(show_header=True, header_style="bold green")
+                table.add_column("Key", style="dim")
+                table.add_column("Value")
+
+                for row in table_data:
+                    table.add_row(*row)
+
+                console.print(Panel(success_text, title="[green]Success[/green]", border_style="green", expand=False))
+                console.print(table)
 
             # Handle optional keys
-            if set(warning_keys) - set(header_dict.keys()) and logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
-                missing_optional = set(warning_keys) - set(header_dict.keys())
-
+            missing_optional = set(warning_keys) - set(header_dict.keys())
+            if missing_optional and logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
                 warning_text = Text()
                 warning_text.append(f"DataParser did not parse all the optional keys for {header_dict['ComponentID']} due to mismatching in naming or missing data.\n", style="yellow")
                 warning_text.append("\nMissing optional keys:\n", style="yellow")
@@ -159,6 +179,16 @@ class DataParser():
                     warning_text,
                     title="[yellow]Warning[/yellow]",
                     border_style="yellow",
+                    expand=False
+                ))
+            elif logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
+                success_text = Text()
+                success_text.append(f"All optional keys for {header_dict['ComponentID']} were successfully parsed.\n", style="green")
+
+                console.print(Panel(
+                    success_text,
+                    title="[green]Success[/green]",
+                    border_style="green",
                     expand=False
                 ))
         
@@ -208,7 +238,7 @@ class DataParser():
     def check_types(self, header_dict):
         """If the data types in header_dict are not correct, convert the types to the correct ones."""
         header_dict['PositionID'] = int(header_dict['PositionID'])
-        header_dict['TrayNo'] = int(header_dict['TrayNo'])
+        # header_dict['TrayNo'] = int(header_dict['TrayNo'])
         header_dict['Density'] = str(header_dict['Density']).upper()
         header_dict['Geometry'] = str(header_dict['Geometry']).capitalize()
         header_dict['Flatness'] = float(header_dict['Flatness'])
