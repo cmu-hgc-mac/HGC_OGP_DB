@@ -32,7 +32,7 @@ degrees = [0.03, 0.06, 90]
 centers = [0.050, 0.100, 10.0]
 
 pin_mapping = {
-    'Full': {'LD': {1: ('p1_center_pin', 'p1O'), 2: ('p2_center_pin', 'p2M')},
+    'Full': {'LD': {1: ('p1_center_pin', 'p1O'), 2: ('p2_center_pin', 'p2M')}, # hole pin, slot pin
              'HD': {1: ('p1_center_pin', 'p1O'), 2: ('p2_center_pin', 'p2M')}},
     'Left': {'LD': {1: ('p1C', 'p1I'), 2: ('p2A', 'p2K')},
              'HD': {1: ('p1F', 'p1P'), 2: ('p2H', 'p2N')}},
