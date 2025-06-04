@@ -1,4 +1,6 @@
-import os, yaml, sys, asyncio, logging, argparse
+import os, yaml, sys, asyncio, logging
+import argparse
+from rich_argparse import RichHelpFormatter
 
 pjoin = os.path.join
 
@@ -41,7 +43,12 @@ async def main_func(comp_type):
     await updater()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=program_descriptions)
+    parser = argparse.ArgumentParser(
+        description=program_descriptions,
+        prog="OGP Auto Uploader",
+        formatter_class=RichHelpFormatter
+    )
+
     parser.add_argument("--print", action='store_true', help="Print the current inventory.")
     parser.add_argument("--clear", action='store_true', help="Clear the current inventory. Note that these do not delete the OGP output files. They only remove the files from being marked as uploaded in the inventory.")
     parser.add_argument("--updatedb", action='store_true', help="Update the credentials in the configuration file.")
