@@ -75,14 +75,13 @@ class SurveyProcessor():
 
         if singular_type == 'baseplate' or singular_type == 'hexaboard':
             Offset = metadata.get("Thickness_Offset", 0)
-            report_thick = metadata.get("Thickness", None)
-            if report_thick is not None:
-                logging.info(f"Unconstrained thickness reported by OGP {report_thick} - Offset: {Offset}")
-                report_thick -= Offset
-            else:
-                report_thick = np.round(np.mean(plotter.z_points), 3) - Offset
-                logging.info(f"Thickness by averaging reported points after subtracting offset {Offset}: {report_thick}")
-            db_upload.update({'flatness': np.round(metadata['Flatness'],3), 'thickness': report_thick})
+            thickness_list = [metadata.get(f'Thickness{i}', None) for i in range(1, 6)]
+            thickness_list = [float(t) for t in thickness_list if t is not None]
+            if len(thickness_list) == 0: logging.warning(f"No valid thickness values found in metadata for {compID}.")
+            report_thick = np.average(thickness_list)
+            logging.info(f"Unconstrained thickness reported by OGP {report_thick} - Offset: {Offset}")
+            report_thick -= Offset
+            db_upload.update({'flatness': np.round(metadata['Flatness'], 3), 'thickness': np.round(report_thick, 3)})
         elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
