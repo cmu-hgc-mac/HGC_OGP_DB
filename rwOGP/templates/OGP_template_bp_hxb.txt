@@ -1,0 +1,45 @@
+<reportheader>               
+{ProjectName}
+LastModified: {ProjectLastModified}		
+Runtime: {RunDateTime}
+Component ID: {$ComponentID} 
+Operator: {$CernID}   
+Geometry: {$Geometry}
+Density: {$Density}
+Sensor size: {$Sensorsize} 
+Flatness: {$Flatness}
+Thickness1: {$Thickness1}
+Thickness2: {$Thickness2}
+Thickness3: {$Thickness3}
+Thickness4: {$Thickness4}
+Thickness5: {$Thickness5}
+Thickness6: {$Thickness6}
+Thickness_Offset: {$Thickness_Offset}
+Position ID: {$PositionID}
+TrayNo: {$TrayNo}
+Comment: {$Comment}
+---
+</reportheader>
+
+<feature>
+{FeatureType} {FeatureName}
+Point     {XXXX.XXXXXXXXXX}    {YYYY.YYYYYYYYYY}    {ZZZZ.ZZZZZZZZZZ}
+<point>    
+// no additional data
+</point>
+<line>
+direction cosine:    {IIII.IIIIIIIIII}    {JJJJ.JJJJJJJJJJ}    {KKKK.KKKKKKKKKK}
+</line>
+<circle>
+direction cosine:    {IIII.IIIIIIIIII}    {JJJJ.JJJJJJJJJJ}    {KKKK.KKKKKKKKKK}
+Radius            {RRRR.RRR}
+</circle>
+<plane>
+direction cosine:    {IIII.IIIIIIIIII}    {JJJJ.JJJJJJJJJJ}    {KKKK.KKKKKKKKKK}
+</plane>
+<default>
+</default>
+</feature>
+
+<reportfooter>     
+</reportfooter> 
