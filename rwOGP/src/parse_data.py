@@ -15,6 +15,17 @@ pbase = os.path.basename
 class ParserKeyException(Exception):
     pass
 
+def parse_key_values(text):
+    pattern = re.compile(r"^(?P<key>[A-Za-z0-9_ ]+):\s*(?P<value>.*?)\s*$")
+    results = {}
+    for line in text.splitlines():
+        match = pattern.match(line)
+        if match:
+            key = match.group('key').strip()
+            value = match.group('value').strip()
+            results[key] = value
+    return results
+
 def preprocess_survey_data(raw_text: str) -> str:
     cleaned_lines = []
     for line in raw_text.strip().splitlines():
@@ -124,9 +135,12 @@ class DataParser():
         parser.parse()
         feature_results = parser.result(format='csv', structure="flat_list")
 
+        alt_header_results = parse_key_values(parts[0])
+
         self.header_results = {}
         for header in header_results:
             self.header_results.update(header)
+        self.header_results.update(alt_header_results)
 
         self.feature_results = pd.read_csv(StringIO(feature_results[0])).drop_duplicates()
         
