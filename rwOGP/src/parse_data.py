@@ -100,7 +100,7 @@ class DataParser():
                 with open(backup_file, 'w') as f:
                     f.write(self.data)
             
-            self.read_temp_sep(self._comp_type)
+            self.read_temp_sep(self.header_template)
             try:
                 output_filename = self.output_meta()
             except ParserKeyException as e:
