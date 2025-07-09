@@ -295,7 +295,7 @@ class DataParser():
                     header_dict[key] = float(header_dict[key])
                 except ValueError:
                     logging.warning(f"Could not convert {key} value '{header_dict[key]}' to float.")
-        if header_dict.get("Thickness_Offset") is not None and header_dict['Thickness_Offset'] != '':
+        if header_dict.get("Thickness_Offset") is not None and header_dict['Thickness_Offset']:
             header_dict['Thickness_Offset'] = float(header_dict['Thickness_Offset'])
         return header_dict
         
