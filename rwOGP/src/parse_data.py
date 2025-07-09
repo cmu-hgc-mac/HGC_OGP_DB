@@ -1,4 +1,4 @@
-import os, yaml, logging
+import os, yaml, logging, re
 from ttp import ttp
 import pandas as pd
 from io import StringIO
@@ -14,6 +14,28 @@ pbase = os.path.basename
 
 class ParserKeyException(Exception):
     pass
+
+def preprocess_survey_data(raw_text: str) -> str:
+    cleaned_lines = []
+    for line in raw_text.strip().splitlines():
+        line = line.strip().replace('\t', ' ')  # remove tabs
+        if not line:
+            continue  # skip empty lines
+
+        if ':' in line:
+            key, value = line.split(':', 1)
+            key = key.strip()
+            value = value.strip()
+            # If value is missing, assign empty string
+            if not value:
+                value = '""'
+            cleaned_lines.append(f"{key}: {value}")
+        else:
+            # Possibly a malformed line, you may choose to skip or handle differently
+            cleaned_lines.append(line.strip())
+
+    return '\n'.join(cleaned_lines)
+
 
 class DataParser():
     """Parse data file(s) using TTP template. 
@@ -70,6 +92,8 @@ class DataParser():
             with open(filename, 'r') as f:
                 self.data = f.read()
             logging.info(f"Parsing data file: {pbase(filename)}")
+
+            self.data = preprocess_survey_data(self.data)
 
             backup_file = pjoin(self.backup_dir, pbase(filename))
             if not os.path.exists(backup_file):
