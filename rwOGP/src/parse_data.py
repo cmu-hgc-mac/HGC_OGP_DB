@@ -287,7 +287,11 @@ class DataParser():
         # header_dict['TrayNo'] = int(header_dict['TrayNo'])
         header_dict['Density'] = str(header_dict['Density']).upper()
         header_dict['Geometry'] = str(header_dict['Geometry']).capitalize()
-        header_dict['Flatness'] = float(header_dict['Flatness'])
+        if header_dict.get('Flatness') is None or header_dict['Flatness'] == '""':
+            logging.error(f"Flatness value is missing or empty for {header_dict['ComponentID']}")
+            logging.error(f"Please check the data file or update the header template.")
+        else:
+            header_dict['Flatness'] = float(header_dict['Flatness'])
         # Convert all keys starting with "Thickness" (e.g., Thickness, Thickness1, Thickness2, Thickness_Offset, etc.) to float if possible
         for key in header_dict:
             if key.startswith("Thickness") and header_dict.get(key) not in (None, ''):
@@ -295,7 +299,7 @@ class DataParser():
                     header_dict[key] = float(header_dict[key])
                 except ValueError:
                     logging.warning(f"Could not convert {key} value '{header_dict[key]}' to float.")
-        if header_dict.get("Thickness_Offset") is not None and header_dict['Thickness_Offset']:
+        if header_dict.get("Thickness_Offset") is not None and header_dict['Thickness_Offset'] != '""':
             header_dict['Thickness_Offset'] = float(header_dict['Thickness_Offset'])
         return header_dict
         
