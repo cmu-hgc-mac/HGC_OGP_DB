@@ -77,10 +77,17 @@ class SurveyProcessor():
             Offset = metadata.get("Thickness_Offset", 0)
             thickness_list = [metadata.get(f'Thickness{i}', None) for i in range(1, 6)]
             thickness_list = [float(t) for t in thickness_list if t is not None]
-            if len(thickness_list) == 0: logging.warning(f"No valid thickness values found in metadata for {compID}.")
-            report_thick = np.average(thickness_list)
-            logging.info(f"Unconstrained thickness reported by OGP {report_thick} - Offset: {Offset}")
-            report_thick -= Offset
+            if len(thickness_list) == 0:
+                if "Thickness" in metadata:
+                    report_thick = float(metadata["Thickness"])
+                    logging.info(f"Using single Thickness value from metadata for {compID}: {report_thick}")
+                else:
+                    logging.warning(f"No valid thickness values found in metadata for {compID}.")
+                    report_thick = None
+            else:
+                report_thick = np.average(thickness_list)
+                logging.info(f"Unconstrained thickness reported by OGP {report_thick} - Offset: {Offset}")
+                report_thick -= Offset
             db_upload.update({'flatness': np.round(metadata['Flatness'], 3), 'thickness': np.round(report_thick, 3)})
         elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
