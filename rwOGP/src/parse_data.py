@@ -294,13 +294,15 @@ class DataParser():
             header_dict['Flatness'] = float(header_dict['Flatness'])
         # Convert all keys starting with "Thickness" (e.g., Thickness, Thickness1, Thickness2, Thickness_Offset, etc.) to float if possible
         for key in header_dict:
-            if key.startswith("Thickness") and header_dict.get(key) not in (None, ''):
+            if key.startswith("Thickness") and (not key.endswith("_Offset")) and header_dict.get(key) not in (None, '""'):
                 try:
                     header_dict[key] = float(header_dict[key])
                 except ValueError:
                     logging.warning(f"Could not convert {key} value '{header_dict[key]}' to float.")
         if header_dict.get("Thickness_Offset") is not None and header_dict['Thickness_Offset'] != '""':
             header_dict['Thickness_Offset'] = float(header_dict['Thickness_Offset'])
+        else:
+            header_dict['Thickness_Offset'] = 0.0
         return header_dict
         
     def adopt_default(self, header_dict):
