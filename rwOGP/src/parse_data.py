@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
 from src.param import default_params, pin_mapping
-from src.parser_template import header_template, data_template, required_keys, warning_keys
+from src.parser_template import data_template, required_keys, warning_keys, header_template_bp_hxb, header_template_pm_module
 
 pjoin = os.path.join
 pbase = os.path.basename
@@ -29,6 +29,14 @@ class DataParser():
         
         self.data_file = data_file
         self.output_dir = output_dir
+        self._comp_type = pbase(self.output_dir).rstrip('s')
+
+        if self._comp_type == 'hexaboard' or self._comp_type == 'baseplate':
+            self.header_template = header_template_bp_hxb
+        elif self._comp_type == 'protomodule' or self._comp_type == 'module':
+            self.header_template = header_template_pm_module
+        else:
+            raise ParserKeyException(f"Component type {self._comp_type} not recognized. Please check the output directory name.")
 
         input_parent = os.path.dirname(data_file[0])
         self.backup_dir = pjoin(input_parent, '.backup')
@@ -68,7 +76,7 @@ class DataParser():
                 with open(backup_file, 'w') as f:
                     f.write(self.data)
             
-            self.read_temp_sep()
+            self.read_temp_sep(self._comp_type)
             try:
                 output_filename = self.output_meta()
             except ParserKeyException as e:
@@ -80,7 +88,7 @@ class DataParser():
             gen_meta.append(pjoin(self.output_dir, f'{output_filename}_meta.yaml'))
         return gen_meta, gen_features
 
-    def read_temp_sep(self, header_template=header_template, feature_template=data_template, delimiter='---'):
+    def read_temp_sep(self, header_template, feature_template=data_template, delimiter='---'):
         """Read data file produced with header and feature templates separated by a delimiter."""
         parts = self.data.split(delimiter)
         
