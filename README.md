@@ -5,12 +5,21 @@ This package is intended to be used to read and write data from the OGP to a loc
 For detailed explanations, refer to [How to use](#how-to-use) section.
 
 ## Getting started
-Currently, there are two types of OGP templates to be used: one for baseplates/hexaboards [OGP_template_bp_hxb.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/cmu-merge/rwOGP/templates/OGP_template_bp_hxb.txt) and one for protomodules/modules [OGP_template_pm_module.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/cmu-merge/rwOGP/templates/OGP_template_pm_module.txt). 
+Currently, there are two types of OGP templates to be used: one for baseplates/hexaboards [OGP_template_bp_hxb.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/cmu-merge/rwOGP/templates/OGP_template_bp_hxb.txt) and one for protomodules/modules [OGP_template_pm_module.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/cmu-merge/rwOGP/templates/OGP_template_pm_module.txt). Every `key: {$value}` pair in the template represents a variable in the OGP survey program. For example, for the pair `Operator: {$CernID}`, the OGP survey program needs to have a routine setting `CernID`. This can be done by either creating an user input variable called `CernID` or by setting the value of `CernID` in the OGP survey program to a fixed string. 
 
-Make changes to the user input routine of every OGP survey program, as demonstrated below.
+See the pictures below for examples of how to set variable routines in the OGP program. 
 ![OGP1](https://github.com/user-attachments/assets/d897793d-df3a-48fc-a04e-fd160cbf312f)
 ![OGP2](https://github.com/user-attachments/assets/eab83325-0726-4e05-b881-7defcc6751c2)
 ![OGP3](https://github.com/user-attachments/assets/d5837b11-1ceb-4c6b-adc1-87542269f7a0)
+
+Next, survey a number of trays for the fiducials that will be referenced when calculating the offsets of protomodules and modules. Based on the surveyed results, create a `yaml` file formatted similar to [tray_example_LD_Full.yaml](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/cmu-merge/rwOGP/templates/trays/tray_example_LD_Full.yaml). Note that not every single key in this tray file needs to be filled out. Depending on the different geometries of the boards assembled, only certain points need to be filled out. **Create an issue ticket if you have questions regarding which keys need to be filled out for specific configuration of geometries.**
+
+Place these tray files in any directory of your choice, then run
+```
+python rwOGP/main.py --updatedir
+```
+choose to update `ogp_tray_dir`, and enter the directory path where the tray files are located. 
+
 
 ### Method 1: Run Python directly
 Clone the repository and install the required packages:
