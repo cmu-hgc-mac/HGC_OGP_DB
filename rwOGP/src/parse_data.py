@@ -16,6 +16,7 @@ class ParserKeyException(Exception):
     pass
 
 def parse_key_values(text):
+    """Parse key-value pairs from a text string."""
     pattern = re.compile(r"^(?P<key>[A-Za-z0-9_ ]+):\s*(?P<value>.*?)\s*$")
     results = {}
     for line in text.splitlines():
@@ -27,6 +28,7 @@ def parse_key_values(text):
     return results
 
 def preprocess_survey_data(raw_text: str) -> str:
+    """Preprocess survey data by cleaning and formatting the text."""
     cleaned_lines = []
     for line in raw_text.strip().splitlines():
         line = line.strip().replace('\t', ' ')  # remove tabs
