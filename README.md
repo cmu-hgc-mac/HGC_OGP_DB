@@ -6,7 +6,8 @@ This package is intended to be used to read and write data from the OGP to a loc
 For detailed explanations, refer to [How to use](#how-to-use) section.
 
 ## Getting started
-Set the output template of all OGP survey programs to be [OGP_template.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/main/rwOGP/templates/OGP_template.txt) file.
+Currently, there are two types of OGP templates to be used: one for baseplates/hexaboards [OGP_template_bp_hxb.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/cmu-merge/rwOGP/templates/OGP_template_bp_hxb.txt) and one for protomodules/modules [OGP_template_pm_module.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/cmu-merge/rwOGP/templates/OGP_template_pm_module.txt). 
+
 Make changes to the user input routine of every OGP survey program, as demonstrated below.
 ![OGP1](https://github.com/user-attachments/assets/d897793d-df3a-48fc-a04e-fd160cbf312f)
 ![OGP2](https://github.com/user-attachments/assets/eab83325-0726-4e05-b881-7defcc6751c2)
