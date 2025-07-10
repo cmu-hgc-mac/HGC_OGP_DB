@@ -240,12 +240,18 @@ class DataParser():
         
         return header_dict
     
-    def check_illegal_chars(self, header_dict):
-        """Remove all illegal characters from the header_dict."""
+    def check_illegal_chars(self, header_dict) -> dict:
+        """Check for illegal characters in the parsed header. If illegal characters are found, prompt the user to remove them."""
         illegal_chars = ['/', '\\', ':', '*', '?', '<', '>', '|']
-        filename_fields = ['ComponentID', 'Operator']
-    
-        for field in filename_fields:
+        check_fields = ['ComponentID', 'Operator', 'Geometry', 'Density']
+
+        for key in header_dict:
+            if key.startswith("Thickness") and (not key.endswith("_Offset")) and header_dict.get(key) not in (None, '""'):
+                check_fields.append(key)
+            if header_dict.get("Thickness_Offset") is not None and header_dict['Thickness_Offset'] != '""':
+                check_fields.append('Thickness_Offset')
+        
+        for field in check_fields:
             has_illegal = any(char in header_dict[field] for char in illegal_chars)
             if has_illegal:
                 original = header_dict[field]
@@ -258,7 +264,19 @@ class DataParser():
                     for char in illegal_chars:
                         cleaned_value = cleaned_value.replace(char, '')
                         header_dict[field] = cleaned_value
-    
+
+        for key in header_dict:
+            if key.startswith("Thickness") and (not key.endswith("_Offset")) and header_dict.get(key) not in (None, '""'):
+                try:
+                    header_dict[key] = float(header_dict[key])
+                except ValueError:
+                    logging.warning(f"Could not convert {key} value '{header_dict[key]}' to float.")
+
+        if header_dict.get("Thickness_Offset") is not None and header_dict['Thickness_Offset'] != '""':
+            header_dict['Thickness_Offset'] = float(header_dict['Thickness_Offset'])
+        else:
+            header_dict['Thickness_Offset'] = 0.0
+
         return header_dict
     
     def check_missing_mappings(self, header_dict):
@@ -292,17 +310,6 @@ class DataParser():
             logging.error(f"Please check the data file or update the header template.")
         else:
             header_dict['Flatness'] = float(header_dict['Flatness'])
-        # Convert all keys starting with "Thickness" (e.g., Thickness, Thickness1, Thickness2, Thickness_Offset, etc.) to float if possible
-        for key in header_dict:
-            if key.startswith("Thickness") and (not key.endswith("_Offset")) and header_dict.get(key) not in (None, '""'):
-                try:
-                    header_dict[key] = float(header_dict[key])
-                except ValueError:
-                    logging.warning(f"Could not convert {key} value '{header_dict[key]}' to float.")
-        if header_dict.get("Thickness_Offset") is not None and header_dict['Thickness_Offset'] != '""':
-            header_dict['Thickness_Offset'] = float(header_dict['Thickness_Offset'])
-        else:
-            header_dict['Thickness_Offset'] = 0.0
         return header_dict
         
     def adopt_default(self, header_dict):
