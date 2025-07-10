@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import os, re, yaml, logging
+import os, re, yaml, logging, glob
 from rich.console import Console
 from rich.table import Table
 import matplotlib.pyplot as plt
@@ -349,7 +349,7 @@ class PlotTool:
         return FD_array
     
     @staticmethod
-    def _get_tray_file(tray_id: str, tray_dir: str) -> str:
+    def _get_tray_file(tray_id: str, tray_dir: str, geometry: str, density: str) -> str:
         """Get the tray file path based on the tray ID.
 
         Args:
@@ -374,10 +374,10 @@ class PlotTool:
                 "[INSTITUTION_NAME]_[LD/HD]_[GEOMETRY]_[NO].yaml"
             )
             filename = f"Tray{tray_id}.yaml"
+            return pjoin(tray_dir, filename)
         else:
-            filename = f"{tray_id}.yaml"
-
-        return pjoin(tray_dir, filename)
+            filename = glob.glob(os.path.join(tray_dir, f"*{density}*{geometry}*{tray_id}.yaml"))
+            return filename[0]
             
     def get_pin_coordinates(self):
         """Get the coordinates of the hole and slot pins from the tray file.
@@ -407,7 +407,7 @@ class PlotTool:
         # Check if TrayNo exists in meta
 
         tray_id = meta.get('TrayNo', None)
-        tray_file = self._get_tray_file(tray_id, tray_dir)
+        tray_file = self._get_tray_file(tray_id, tray_dir, geometry, density)
     
         logging.debug(f"Using Tray {tray_id} info in {tray_dir}...")
         logging.debug(f"Geometry: {geometry}; Density: {density}; PositionID: {position_id}")
