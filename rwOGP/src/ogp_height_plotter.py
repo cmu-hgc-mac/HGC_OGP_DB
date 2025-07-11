@@ -407,6 +407,13 @@ class PlotTool:
         # Check if TrayNo exists in meta
 
         tray_id = meta.get('TrayNo', None)
+        if tray_id is None:
+            logging.error("TrayNo not found in metadata. Please check the metadata file.")
+        elif tray_id.isdigit() and len(tray_id) == 3:
+            tray_id = tray_id[-1]
+        else:
+            logging.warning(f"TrayNo '{tray_id}' is not a valid 3-digit notation.")
+            
         tray_file = self._get_tray_file(tray_id, tray_dir, geometry, density)
     
         logging.debug(f"Using Tray {tray_id} info in {tray_dir}...")
