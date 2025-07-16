@@ -315,6 +315,8 @@ class PlotTool:
             FD_points = self.features.copy()
             FD_points['FD_number'] = FD_points['FeatureName'].apply(get_fd_number)
             FD_points = FD_points.dropna(subset=['FD_number'])
+            
+        FD_points['FD_number'] = FD_points['FD_number'].astype(int)
         
         FD_names = FD_points['FeatureName'].values
         FD_numbers = FD_points['FD_number'].values
