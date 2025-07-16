@@ -240,16 +240,16 @@ class PlotTool:
                 fd_indices = [0, 1, 2, 3] # FD1, FD2, FD3, FD4
             else:
                 fd_indices = [0, 2] # FD1 and FD3
-            FDCenter = self.get_FD_center(fd_indices, FDPoints)
         if density == 'LD':
             if geometry == 'Full':
                 if CompType == 'module':
                     fd_indices = [2, 5] # FD3 and FD6
                 elif CompType == 'protomodule':
-                    fd_indices = [0, 1, 2, 3] # FD1, FD2, FD3, FD4
+                    fd_indices = [0, 1, 3, 4] # FD1, FD2, FD3, FD4
             else:
                 fd_indices = [0, 2] # FD1 and FD3
-            FDCenter = self.get_FD_center(fd_indices, FDPoints)
+            
+        FDCenter = self.get_FD_center(fd_indices, FDPoints)
 
         adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
         logging.debug(f'Adjustment X: {adjustmentX}, Adjustment Y: {adjustmentY}')
