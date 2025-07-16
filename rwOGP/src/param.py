@@ -11,6 +11,9 @@ protomodules_params = {"vmini": 1.37, "vmaxi": 1.79, "new_angle": 270, "db_table
 modules_params = {"vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, "db_table_name": 'module_inspect', 
                   "mother_table": 'module_info', 'prefix': 'module'}
 
+# Map channel numbers to FDs
+fd_maps = [1, 8, 111, 197, 191] # FD1, FD2, FD3, FD4, FD5
+
 COMP_PREFIX = {'baseplate': 'bp', 'hexaboard': 'hxb', 'protomodule': 'proto', 'module': 'module'}
 
 default_params = {"PositionID": 1, "Geometry": "Full", "Density": "LD", "TrayNo": 1}
