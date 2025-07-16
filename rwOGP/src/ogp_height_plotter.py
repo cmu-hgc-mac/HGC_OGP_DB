@@ -309,8 +309,8 @@ class PlotTool:
         elif match_prefix.upper() == 'CH':
             def get_fd_number(name):
                 for idx, fd_id in enumerate(fd_maps):
-                    pattern = fr'(^|[^a-zA-Z0-9]){match_prefix}{fd_id}($|[^a-zA-Z0-9])'
-                    if re.search(pattern, name):
+                    pattern = fr'{match_prefix}{fd_id}(?!\d)'
+                    if re.search(pattern, name, flags=re.IGNORECASE):
                         return idx + 1
                 return None
             # def get_fd_number(name):
