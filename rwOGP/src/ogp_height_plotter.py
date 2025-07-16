@@ -320,7 +320,7 @@ class PlotTool:
         
         FD_names = FD_points['FeatureName'].values
         FD_numbers = FD_points['FD_number'].values
-        logging.debug(f"Found fiducial positions in {FD_names} with numbers {FD_numbers}")
+        logging.info(f"Found fiducial positions in {FD_names} with numbers {FD_numbers}")
         x_y_coords = FD_points[['X_coordinate', 'Y_coordinate']].values
         num_FDs = len(x_y_coords)
         if not num_FDs in {2, 4, 6, 8}:
