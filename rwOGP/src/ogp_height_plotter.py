@@ -309,9 +309,9 @@ class PlotTool:
         elif match_prefix.upper() == 'CH':
             def get_fd_number(name):
                 for idx, fd_id in enumerate(fd_maps):
-                    pattern = fr'\b{match_prefix}{fd_id}\b'
+                    pattern = fr'(?<!\w){match_prefix}{fd_id}(?!\w)'
                     if re.search(pattern, name, flags=re.IGNORECASE):
-                        return idx + 1  # FD numbering starts from 1
+                        return idx + 1
                 return None
             FD_points = self.features.copy()
             FD_points['FD_number'] = FD_points['FeatureName'].apply(get_fd_number)
