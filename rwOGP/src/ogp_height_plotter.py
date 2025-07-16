@@ -309,10 +309,16 @@ class PlotTool:
         elif match_prefix.upper() == 'CH':
             def get_fd_number(name):
                 for idx, fd_id in enumerate(fd_maps):
-                    pattern = fr'(?<!\w){match_prefix}{fd_id}(?!\w)'
-                    if re.search(pattern, name, flags=re.IGNORECASE):
+                    pattern = fr'(^|[^a-zA-Z0-9]){match_prefix}{fd_id}($|[^a-zA-Z0-9])'
+                    if re.search(pattern, name):
                         return idx + 1
                 return None
+            # def get_fd_number(name):
+            #     for idx, fd_id in enumerate(fd_maps):
+            #         pattern = fr'(?<!\w){match_prefix}{fd_id}(?!\w)'
+            #         if re.search(pattern, name, flags=re.IGNORECASE):
+            #             return idx + 1
+            #     return None
             FD_points = self.features.copy()
             FD_points['FD_number'] = FD_points['FeatureName'].apply(get_fd_number)
             FD_points = FD_points.dropna(subset=['FD_number'])
