@@ -6,7 +6,7 @@ from rich.table import Table
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_CALC_CONFIG
+from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_CALC_CONFIG, fd_maps
 
 pjoin = os.path.join
 
@@ -240,16 +240,16 @@ class PlotTool:
                 fd_indices = [0, 1, 2, 3] # FD1, FD2, FD3, FD4
             else:
                 fd_indices = [0, 2] # FD1 and FD3
-            FDCenter = self.get_FD_center(fd_indices, FDPoints)
         if density == 'LD':
             if geometry == 'Full':
                 if CompType == 'module':
                     fd_indices = [2, 5] # FD3 and FD6
                 elif CompType == 'protomodule':
-                    fd_indices = [0, 1, 2, 3] # FD1, FD2, FD3, FD4
+                    fd_indices = [0, 1, 3, 4] # FD1, FD2, FD3, FD4
             else:
                 fd_indices = [0, 2] # FD1 and FD3
-            FDCenter = self.get_FD_center(fd_indices, FDPoints)
+            
+        FDCenter = self.get_FD_center(fd_indices, FDPoints)
 
         adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
         logging.debug(f'Adjustment X: {adjustmentX}, Adjustment Y: {adjustmentY}')
@@ -295,19 +295,39 @@ class PlotTool:
 
         return CenterOffset, AngleOffset, XOffset, YOffset
 
-    def get_FDs(self) -> np.array:
+    def get_FDs(self, match_prefix='CH') -> np.array:
         """Get the fiducial points from the features dataframe, ordered by the FD number.
         If none of the FDs are found, return False.
         
         Return 
         - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
-        FD_points = self.features[self.features['FeatureName'].str.contains('FD', case=False)].copy()
-        FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(
-            lambda x: int(re.search(r'FD(\d+)', x, re.IGNORECASE).group(1)) if re.search(r'FD(\d+)', x, re.IGNORECASE) else 0
-        )
+        if match_prefix.upper() == 'FD':
+            FD_points = self.features[self.features['FeatureName'].str.contains('FD', case=False)].copy()
+            FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(
+                lambda x: int(re.search(r'FD(\d+)', x, re.IGNORECASE).group(1)) if re.search(r'FD(\d+)', x, re.IGNORECASE) else 0
+            )
+        elif match_prefix.upper() == 'CH':
+            def get_fd_number(name):
+                for idx, fd_id in enumerate(fd_maps):
+                    pattern = fr'{match_prefix}{fd_id}(?!\d)'
+                    if re.search(pattern, name, flags=re.IGNORECASE):
+                        return idx + 1
+                return None
+            # def get_fd_number(name):
+            #     for idx, fd_id in enumerate(fd_maps):
+            #         pattern = fr'(?<!\w){match_prefix}{fd_id}(?!\w)'
+            #         if re.search(pattern, name, flags=re.IGNORECASE):
+            #             return idx + 1
+            #     return None
+            FD_points = self.features.copy()
+            FD_points['FD_number'] = FD_points['FeatureName'].apply(get_fd_number)
+            FD_points = FD_points.dropna(subset=['FD_number'])
+            
+        FD_points['FD_number'] = FD_points['FD_number'].astype(int)
+        
         FD_names = FD_points['FeatureName'].values
         FD_numbers = FD_points['FD_number'].values
-        logging.debug(f"Found fiducial positions in {FD_names} with numbers {FD_numbers}")
+        logging.info(f"Found fiducial positions in {FD_names} with numbers {FD_numbers}")
         x_y_coords = FD_points[['X_coordinate', 'Y_coordinate']].values
         num_FDs = len(x_y_coords)
         if not num_FDs in {2, 4, 6, 8}:
@@ -349,7 +369,7 @@ class PlotTool:
         return FD_array
     
     @staticmethod
-    def _get_tray_file(tray_id: str, tray_dir: str, geometry: str, density: str) -> str:
+    def _get_tray_file(tray_id: str, tray_dir: str) -> str:
         """Get the tray file path based on the tray ID.
 
         Args:
@@ -365,19 +385,8 @@ class PlotTool:
         if not tray_id:
             raise ValueError("TrayNo not found in metadata")
 
-        # Check if tray_id follows the naming convention
-        has_proper_format = '_' in str(tray_id)
-
-        if not has_proper_format:
-            logging.warning(
-                f"Tray ID '{tray_id}' does not follow the recommended naming convention: "
-                "[INSTITUTION_NAME]_[LD/HD]_[GEOMETRY]_[NO].yaml"
-            )
-            filename = f"Tray{tray_id}.yaml"
-            return pjoin(tray_dir, filename)
-        else:
-            filename = glob.glob(os.path.join(tray_dir, f"*{density}*{geometry}*{tray_id}.yaml"))
-            return filename[0]
+        filename = glob.glob(os.path.join(tray_dir, f"{tray_id}.yaml"))
+        return filename[0]
             
     def get_pin_coordinates(self):
         """Get the coordinates of the hole and slot pins from the tray file.
@@ -407,7 +416,14 @@ class PlotTool:
         # Check if TrayNo exists in meta
 
         tray_id = meta.get('TrayNo', None)
-        tray_file = self._get_tray_file(tray_id, tray_dir, geometry, density)
+        if tray_id is None:
+            logging.error("TrayNo not found in metadata. Please check the metadata file.")
+        elif tray_id.isdigit() and len(tray_id) == 3:
+            tray_id = tray_id
+        else:
+            logging.warning(f"TrayNo '{tray_id}' is not a valid 3-digit notation.")
+            
+        tray_file = self._get_tray_file(tray_id, tray_dir)
     
         logging.debug(f"Using Tray {tray_id} info in {tray_dir}...")
         logging.debug(f"Geometry: {geometry}; Density: {density}; PositionID: {position_id}")

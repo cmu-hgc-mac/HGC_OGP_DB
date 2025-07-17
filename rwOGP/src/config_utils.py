@@ -42,6 +42,7 @@ def setup_logging(level=logging.INFO, show_time=True, show_path=False):
         handlers=[rich_handler],
         force=True  # Force reconfiguration
     )
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
     
     # Return a logger for the module
     return logging.getLogger(__name__)
