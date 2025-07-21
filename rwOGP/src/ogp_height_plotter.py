@@ -302,9 +302,9 @@ class PlotTool:
         Return 
         - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
         if match_prefix.upper() == 'FD':
-            FD_points = self.features[self.features['FeatureName'].str.contains('FD', case=False)].copy()
+            FD_points = self.features[self.features['FeatureName'].str.contains(r'FD\d+(?!\d)', case=False, regex=True)].copy()
             FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(
-                lambda x: int(re.search(r'FD(\d+)', x, re.IGNORECASE).group(1)) if re.search(r'FD(\d+)', x, re.IGNORECASE) else 0
+                lambda x: int(re.search(r'FD(\d+)(?!\d)', x, re.IGNORECASE).group(1)) if re.search(r'FD(\d+)(?!\d)', x, re.IGNORECASE) else 0
             )
         elif match_prefix.upper() == 'CH':
             def get_fd_number(name):
@@ -313,12 +313,6 @@ class PlotTool:
                     if re.search(pattern, name, flags=re.IGNORECASE):
                         return idx + 1
                 return None
-            # def get_fd_number(name):
-            #     for idx, fd_id in enumerate(fd_maps):
-            #         pattern = fr'(?<!\w){match_prefix}{fd_id}(?!\w)'
-            #         if re.search(pattern, name, flags=re.IGNORECASE):
-            #             return idx + 1
-            #     return None
             FD_points = self.features.copy()
             FD_points['FD_number'] = FD_points['FeatureName'].apply(get_fd_number)
             FD_points = FD_points.dropna(subset=['FD_number'])
