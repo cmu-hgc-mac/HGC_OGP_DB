@@ -177,7 +177,7 @@ class DBClient():
             conn = await asyncpg.connect(**self._connect_params)
             query = """SELECT x_offset_mu, y_offset_mu, ang_offset_deg
                         FROM proto_inspect
-                        WHERE proto_name = $1
+                        WHERE LOWER(proto_name) = LOWER($1)
                         ORDER BY proto_row_no DESC
                         LIMIT 1;"""
             # Order by row number descending to get the most recent entry
