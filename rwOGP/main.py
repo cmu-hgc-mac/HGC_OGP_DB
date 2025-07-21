@@ -1,4 +1,5 @@
-import os, yaml, sys, asyncio, logging, glob, argparse, datetime
+import os, yaml, sys, asyncio, logging, glob, argparse
+from datetime import datetime
 from rich_argparse import RichHelpFormatter
 from rich.table import Table
 from rich.console import Console
@@ -62,7 +63,24 @@ def test_workflow():
             return
     
     check_dir = config.get('ogp_survey_dir')
-    comp_type = input("Enter component type (protomodules/modules): ").strip()
+    comp_types = ["protomodules", "modules"]
+    console = Console()
+    table = Table(title="Select a component type")
+    table.add_column("Index", justify="center")
+    table.add_column("Component Type", justify="left")
+    for idx, ctype in enumerate(comp_types):
+        table.add_row(str(idx), ctype)
+    console.print(table)
+    while True:
+        try:
+            selection = int(input(f"Enter the index of the component type (0-{len(comp_types)-1}): ").strip())
+            if 0 <= selection < len(comp_types):
+                comp_type = comp_types[selection]
+                break
+            else:
+                logging.error("Invalid selection. Please try again.")
+        except ValueError:
+            logging.error("Please enter a valid number.")
     check_dir = pjoin(check_dir, comp_type)
     # Find files in check_dir, sort by modification time (descending)
     files = sorted(glob.glob(pjoin(check_dir, "*.txt")),
