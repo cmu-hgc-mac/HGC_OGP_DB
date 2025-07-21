@@ -70,7 +70,7 @@ def test_workflow():
     console.print(f"[bold yellow]1[/bold yellow]: [bold yellow]{comp_types[1]}[/bold yellow]")
     while True:
         try:
-            selection = int(input(f"Enter [bold green]0[/bold green] for [bold green]protomodules[/bold green] or [bold yellow]1[/bold yellow] for [bold yellow]modules[/bold yellow]: ").strip())
+            selection = int(console.input("Enter [bold green]0[/bold green] for [bold green]protomodules[/bold green] or [bold yellow]1[/bold yellow] for [bold yellow]modules[/bold yellow]: ").strip())
             if 0 <= selection < len(comp_types):
                 comp_type = comp_types[selection]
                 break
