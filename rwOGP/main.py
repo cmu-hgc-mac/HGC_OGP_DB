@@ -65,15 +65,12 @@ def test_workflow():
     check_dir = config.get('ogp_survey_dir')
     comp_types = ["protomodules", "modules"]
     console = Console()
-    table = Table(title="Select a component type")
-    table.add_column("Index", justify="center")
-    table.add_column("Component Type", justify="left")
-    for idx, ctype in enumerate(comp_types):
-        table.add_row(str(idx), ctype)
-    console.print(table)
+    console.print("[bold cyan]Select component type:[/bold cyan]")
+    console.print(f"[bold green]0[/bold green]: protomodules")
+    console.print(f"[bold yellow]1[/bold yellow]: modules")
     while True:
         try:
-            selection = int(input(f"Enter the index of the component type (0-{len(comp_types)-1}): ").strip())
+            selection = int(input(f"Enter 0 for protomodules or 1 for modules: ").strip())
             if 0 <= selection < len(comp_types):
                 comp_type = comp_types[selection]
                 break
