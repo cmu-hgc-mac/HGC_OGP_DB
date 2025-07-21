@@ -87,10 +87,10 @@ def test_workflow():
         logging.warning("No files found in the directory. Exiting test mode.")
         return
 
-    table = Table(title="Select a file to test")
-    table.add_column("Index", justify="center")
-    table.add_column("File Name", justify="left")
-    table.add_column("Last Modified", justify="center")
+    table = Table(title="[bold magenta]Select a file to test[/bold magenta]", show_header=True, header_style="bold blue")
+    table.add_column("Index", justify="center", style="bold green")
+    table.add_column("File Name", justify="left", style="yellow")
+    table.add_column("Last Modified", justify="center", style="cyan")
 
     for idx, file_path in enumerate(files):
         last_modified = os.path.getmtime(file_path)
@@ -99,7 +99,8 @@ def test_workflow():
             else
             f"{datetime.fromtimestamp(last_modified).strftime('%Y-%m-%d %H:%M:%S')}"
         )
-        table.add_row(str(idx), os.path.basename(file_path), last_modified_str)
+        row_style = "on grey15" if idx % 2 == 0 else ""
+        table.add_row(f"[bold green]{idx}[/bold green]", f"[yellow]{os.path.basename(file_path)}[/yellow]", f"[cyan]{last_modified_str}[/cyan]", style=row_style)
 
     console = Console()
     console.print(table)
