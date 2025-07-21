@@ -112,7 +112,7 @@ def test_angle_calculations(sample_path, comp_type):
 
 def test_module_workflow(sample_path, comp_type, tray_dir):
     setup_logging(level=logging.INFO)
-    parser = DataParser(sample_path, 'tests')
+    parser = DataParser(sample_path, f'tests/{comp_type}')
     meta, features = parser()
 
     with open(meta[0], 'r') as f:
@@ -121,7 +121,7 @@ def test_module_workflow(sample_path, comp_type, tray_dir):
     setup_logging()
 
     feature_df = pd.read_csv(features[0])
-    PT = PlotTool(metadata, comp_type, feature_df, tray_dir, 'tests')
+    PT = PlotTool(metadata, comp_type, feature_df, tray_dir, f'tests/{comp_type}')
     
     im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
