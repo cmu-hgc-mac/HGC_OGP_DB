@@ -206,9 +206,9 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
             sign * points_diff[1],
             sign * points_diff[0]))
         if sign == 1:
-            logging.debug(f"Using Angle of FD1 -> FD2 for rotational offset: {angle}")
+            logging.debug(f"Using Angle of FD1 -> FD2 for rotational offset angle: {angle}")
         else:
-            logging.debug(f"Using Angle of FD2 -> FD1 for rotational offset: {angle}")
+            logging.debug(f"Using Angle of FD2 -> FD1 for rotational offset angle: {angle}")
     else:
         points_diff = fdpoints[2] - fdpoints[5] # vector from FD6 to FD3
         angle = np.degrees(np.arctan2(
