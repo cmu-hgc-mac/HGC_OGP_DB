@@ -219,6 +219,7 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
     return angle
 
 def calc_HDfull_angle(fdpoints, comp_type, is_second=False) -> float:
+    """Calculate the angle deviation for HD Full geometry."""
     if fdpoints[0][1] >= 200: points_diff = fdpoints[1] - fdpoints[0]; B = 1;  # vector from FD1 to FD2
     else: points_diff = fdpoints[0] - fdpoints[1]; B = -1; # vector from FD2 to FD1
     angle = B*np.degrees(np.arctan2(
