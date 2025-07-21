@@ -201,14 +201,14 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
     """Calculate the angle deviation for PM/Modules with Full geometry."""
     sign = -1 if is_second else 1
     if comp_type == 'protomodule':
-        points_diff = fdpoints[1] - fdpoints[0] # vector from FD1 to FD2
+        points_diff = fdpoints[3] - fdpoints[0] # vector from FD1 to FD4
         angle = np.degrees(np.arctan2(
             sign * points_diff[1],
             sign * points_diff[0]))
         if sign == 1:
-            logging.debug(f"Using Angle of FD1 -> FD2 for rotational offset angle: {angle}")
+            logging.debug(f"Using Angle of FD1 -> FD4 for rotational offset angle: {angle}")
         else:
-            logging.debug(f"Using Angle of FD2 -> FD1 for rotational offset angle: {angle}")
+            logging.debug(f"Using Angle of FD4 -> FD1 for rotational offset angle: {angle}")
     else:
         points_diff = fdpoints[2] - fdpoints[5] # vector from FD6 to FD3
         angle = np.degrees(np.arctan2(
