@@ -75,9 +75,16 @@ def test_workflow():
     table = Table(title="Select a file to test")
     table.add_column("Index", justify="center")
     table.add_column("File Name", justify="left")
+    table.add_column("Last Modified", justify="center")
 
     for idx, file_path in enumerate(files):
-        table.add_row(str(idx), os.path.basename(file_path))
+        last_modified = os.path.getmtime(file_path)
+        last_modified_str = (
+            f"{last_modified:.0f}" if last_modified is None
+            else
+            f"{datetime.fromtimestamp(last_modified).strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        table.add_row(str(idx), os.path.basename(file_path), last_modified_str)
 
     console = Console()
     console.print(table)
