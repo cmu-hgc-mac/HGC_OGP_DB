@@ -209,13 +209,22 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
             logging.debug(f"Using Angle of FD1 -> FD4 for rotational offset angle: {angle}")
         else:
             logging.debug(f"Using Angle of FD4 -> FD1 for rotational offset angle: {angle}")
-    else:
-        points_diff = fdpoints[2] - fdpoints[5] # vector from FD6 to FD3
-        angle = np.degrees(np.arctan2(
-            sign * points_diff[1],
-            sign * points_diff[0])) - 90
+    elif comp_type == 'module':
+        #! sloppy fix
+        # Compute both possible directions and pick the one with the smallest absolute angle
+        diff1 = fdpoints[2] - fdpoints[5]
+        diff2 = fdpoints[5] - fdpoints[2]
+        angle1 = np.degrees(np.arctan2(sign * diff1[1], sign * diff1[0])) - 90
+        angle2 = np.degrees(np.arctan2(sign * diff2[1], sign * diff2[0])) - 90
+        # Choose the angle closer to zero (i.e., -180/180 ambiguity)
+        if abs(angle1) < abs(angle2):
+            angle = angle1
+        else:
+            angle = angle2
         if sign == 1:
             logging.debug(f"Using Angle of FD6 -> FD3 for rotational offset: {angle}")
+    else:
+        logging.error(f"Component type {comp_type} not recognized for angle calculation.")
     return angle
 
 def calc_HDfull_angle(fdpoints, comp_type, is_second=False) -> float:
