@@ -198,7 +198,7 @@ def calc_five_angle(fd3to1, is_second=False) -> float:
     return np.degrees(np.arctan2(sign * fd3to1[1], sign * fd3to1[0]))
 
 def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
-    """Calculate the reference angle of FD points"""
+    """Calculate the angle deviation for PM/Modules with Full geometry."""
     sign = -1 if is_second else 1
     if comp_type == 'protomodule':
         points_diff = fdpoints[1] - fdpoints[0] # vector from FD1 to FD2
