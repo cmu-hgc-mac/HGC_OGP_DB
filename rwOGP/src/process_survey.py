@@ -94,9 +94,21 @@ class SurveyProcessor():
                              'avg_thickness': report_thick, 'grade': 'A', 'max_thickness': max_thickness})
         elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
+            report_thick = metadata.get("Thickness", None)
+            if report_thick is None:
+                report_thick = np.round(np.mean(plotter.z_points), 3)
+                logging.warning(f"No Thickness value found in metadata for {compID}. Using average thickness from OGP data: {report_thick}")
+            else:
+                z_points_filtered = [z for z in plotter.z_points if z >= 0]
+                if z_points_filtered:
+                    report_thick = np.round(np.mean(z_points_filtered), 3)
+                    logging.warning(f"No Thickness value found in metadata for {compID}. Using average of non-negative OGP z_points: {report_thick}")
+                else:
+                    report_thick = None
+                    logging.warning(f"No valid (non-negative) z_points found for {compID}.")
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               "weight": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3), "flatness": np.round(metadata['Flatness'],3),
-                             'avg_thickness': np.round(np.mean(plotter.z_points),3), 'grade': grade((XOffset, YOffset), AngleOff)})
+                             'avg_thickness': report_thick, 'grade': grade((XOffset, YOffset), AngleOff)})
             if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
                 SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
