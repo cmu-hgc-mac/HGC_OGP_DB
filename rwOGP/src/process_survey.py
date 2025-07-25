@@ -104,7 +104,7 @@ class SurveyProcessor():
                 else:
                     logging.warning(f"No valid (non-negative) z_points found for {compID}.")
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              "weight": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3), "flatness": np.round(metadata['Flatness'],3),
+                              "weight_grams": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3), "flatness": np.round(metadata['Flatness'],3),
                              'avg_thickness': report_thick, 'grade': grade((XOffset, YOffset), AngleOff)})
             if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
