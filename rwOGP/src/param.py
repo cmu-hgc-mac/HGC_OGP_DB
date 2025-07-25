@@ -104,7 +104,7 @@ ANGLE_CALC_CONFIG = {
     'Full': {
         'HD': {
             1: lambda fd3to1, fdpoints, *_: calc_HDfull_angle(fdpoints, None),
-            2: lambda fd3to1, fdpoints, *_: calc_HDfull_angle(fdpoints, None, True),
+            2: lambda fd3to1, fdpoints, *_: calc_HDfull_angle(-fdpoints, None, True),
         },
         'LD': {
             1: lambda fd3to1, fdpoints, comp_type: calc_full_angle(fdpoints, comp_type),
