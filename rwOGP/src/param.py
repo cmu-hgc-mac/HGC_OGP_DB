@@ -98,7 +98,7 @@ ANGLE_CALC_CONFIG = {
     'Right': {
         'LD': {
             1: lambda fd3to1, *_: calc_five_angle(fd3to1),
-            2: lambda fd3to1, *_: calc_five_angle(fd3to1),
+            2: lambda fd3to1, *_: calc_five_angle(-fd3to1),
         }
     },
     'Full': {
