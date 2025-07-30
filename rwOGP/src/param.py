@@ -86,19 +86,19 @@ ANGLE_CALC_CONFIG = {
         }
     },
     'Five': {
-        1: lambda fd3to1, *_: calc_five_angle(fd3to1),
-        2: lambda fd3to1, *_: calc_five_angle(fd3to1, True),
+        1: lambda fd3to1, fdpoints, comp_type: calc_five_angle(fdpoints, fd3to1, comp_type),
+        2: lambda fd3to1, fdpoints, comp_type: calc_five_angle(fdpoints, fd3to1, comp_type, True),
     },
     'Left': {
         'LD': {
-            1: lambda fd3to1, *_: calc_five_angle(fd3to1),
-            2: lambda fd3to1, *_: calc_five_angle(fd3to1, True),
+            1: lambda fd3to1, *_: calc_semi_angle(fd3to1),
+            2: lambda fd3to1, *_: calc_semi_angle(fd3to1, True),
         }
     },
     'Right': {
         'LD': {
-            1: lambda fd3to1, *_: calc_five_angle(fd3to1),
-            2: lambda fd3to1, *_: calc_five_angle(-fd3to1),
+            1: lambda fd3to1, *_: calc_semi_angle(fd3to1),
+            2: lambda fd3to1, *_: calc_semi_angle(-fd3to1),
         }
     },
     'Full': {
@@ -189,8 +189,8 @@ def calc_basic_angle(fd3to1) -> float:
     """
     return np.degrees(np.arctan2(fd3to1[0], fd3to1[1]) * -1)
 
-def calc_five_angle(fd3to1, is_second=False) -> float:
-    """Calculate the angle for the Five component
+def calc_semi_angle(fd3to1, is_second=False) -> float:
+    """Calculate the angle for the LEFT AND RIGHT component
     
     Parameters
     ----------
@@ -199,6 +199,24 @@ def calc_five_angle(fd3to1, is_second=False) -> float:
     is_second : bool, optional. Indicate Position (1/2)"""
     sign = 1 if is_second else -1
     return np.degrees(np.arctan2(sign * fd3to1[1], sign * fd3to1[0]))
+
+
+def calc_five_angle(fdpoints, fd3to1, comp_type, is_second=False) -> float:
+    """Calculate the angle deviation for LD FIVE geometry."""
+    print("COMPTYPE COMPTYPE COMPTYPE", comp_type)
+    if comp_type == 'protomodule':
+        print(fdpoints, "FDPOINTS IS HERE")
+        if fdpoints[0][1] >= 200: points_diff = fdpoints[1] - fdpoints[0]; B = 1;  # vector from FD1 to FD2
+        else: points_diff = fdpoints[0] - fdpoints[1]; B = -1; # vector from FD2 to FD1
+        angle = B*np.degrees(np.arctan2(
+            points_diff[0],
+            points_diff[1]))
+        logging.debug(f"Angle of FD1 -> FD2: {angle}")
+        return angle
+    elif comp_type == 'module':
+        sign = 1 if is_second else -1
+        return np.degrees(np.arctan2(sign * fd3to1[1], sign * fd3to1[0]))
+
 
 def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
     """Calculate the angle deviation for PM/Modules with Full geometry."""
