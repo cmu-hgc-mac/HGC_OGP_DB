@@ -55,7 +55,7 @@ ADJUSTMENTS = {
         'Five':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
         'Top':    {'LD': {1: (9.72, 0),  2: (-9.72, 0)},   'HD': {1: (8.44, 0),   2: (-8.44, 0)}},
         'Bottom': {'LD': {1: (-9.72, 0),   2: (9.72, 0)},  'HD': {1: (-16, 0),     2: (16, 0)}},
-        'Right':  {'LD': {1: (0, 9.72),   2: (0, -9.72)},  'HD': {1: (0, 6.52),    2: (0, -6.52)}},
+        'Right':  {'LD': {1: (0, -9.72),   2: (0, 9.72)},  'HD': {1: (0, 6.52),    2: (0, -6.52)}},
         'Left':   {'LD': {1: (0, 9.72),  2: (0, -9.72)},   'HD': {1: (0, -6.52),   2: (0, 6.52)}}
     },
     'module': {
@@ -203,9 +203,7 @@ def calc_semi_angle(fd3to1, is_second=False) -> float:
 
 def calc_five_angle(fdpoints, fd3to1, comp_type, is_second=False) -> float:
     """Calculate the angle deviation for LD FIVE geometry."""
-    print("COMPTYPE COMPTYPE COMPTYPE", comp_type)
     if comp_type == 'protomodule':
-        print(fdpoints, "FDPOINTS IS HERE")
         if fdpoints[0][1] >= 200: points_diff = fdpoints[1] - fdpoints[0]; B = 1;  # vector from FD1 to FD2
         else: points_diff = fdpoints[0] - fdpoints[1]; B = -1; # vector from FD2 to FD1
         angle = B*np.degrees(np.arctan2(
@@ -222,7 +220,7 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
     """Calculate the angle deviation for PM/Modules with Full geometry."""
     sign = -1 if is_second else 1
     if comp_type == 'protomodule':
-        points_diff = fdpoints[3] - fdpoints[0] # vector from FD1 to FD4
+        points_diff = fdpoints[4] - fdpoints[0] # vector from FD1 to FD5
         angle = np.degrees(np.arctan2(
             sign * points_diff[1],
             sign * points_diff[0]))
