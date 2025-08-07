@@ -212,7 +212,7 @@ def calc_five_angle(fdpoints, fd3to1, comp_type, is_second=False) -> float:
         logging.debug(f"Angle of FD1 -> FD2: {angle}")
         return angle
     elif comp_type == 'module':
-        sign = 1 if is_second else -1
+        sign = -1 if is_second else 1
         return np.degrees(np.arctan2(sign * fd3to1[1], sign * fd3to1[0]))
 
 
