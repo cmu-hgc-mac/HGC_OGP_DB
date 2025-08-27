@@ -21,6 +21,8 @@ python rwOGP/main.py --updatedir
 ```
 choose to update `ogp_tray_dir`, and enter the directory path where the tray files are located. 
 
+For further instructions or materials on how to survey a tray or the formatting of the results, refer to [this section](#general-understanding-of-offset-calculations).
+
 
 ### Method 1: Run Python directly
 Clone the repository and install the required packages:
@@ -76,14 +78,31 @@ This GUI contains two tabs: 'View Plots' and 'Upload Files'. Run `python rwOGP/s
 ![OGP_GUI](https://github.com/murthysindhu/HGC_DB_postgres/assets/58646122/dbeddf4c-2dc8-4da7-8f26-f916d1c69b74)
 
 ## Developer's Notes:
-## Troubleshooting
-### Missing entries (data or header or the entire txt file)
+### General understanding of offset calculations
+Refer to Calculations Guide.pptx by Paolo for definitions of FD points of different geometries and densities. 
+
+To calculate both displacement and angular offsets, we need to determine an absolute center and another fiducial point, and this is done through surveying the assembly tray. The python program requires reading from a tray file that contains these tray survey results, for comparing the surveyed module center versus the assembly tray center. Some examples of tray surveys are provided in [here](rwOGP//templates/trays). 
+
+Notice that the tray files provided in the directory have different pin positions to fill out. Some MACs (such as UCSB MAC) make more module geometries. These other shapes require pins to be in different locations around the assembly tray. For LDFull or HDFull only, creating a tray template file such as [tray_example_LD_Full.yaml](rwOGP//templates/trays/tray_example_LD_Full.yaml) may be necessary.
+
+### Details on surveying LD Full assembly trays as an example
+Take a look at [tray_example_LD_Full.yaml](rwOGP//templates/trays/tray_example_LD_Full.yaml), you'll have to fill out a tray file like this one for each position:
+
+* Tray Number: This is the "Name" of the Assembly Tray. I suggest calling them something like "101" & "102" where the "10_" is the assembly tray and the "__1" is the position of the assembly tray.
+*  Tray Name: Just call it "Tray _". (Fill in the blank with your tray number)
+In the module_geoms section, you'll put "  ['LDF']  " because you're only making LD Full modules. 
+* Tray Fiducial: This is the secondary tray fiducial location, for us this is the top left corner of our assembly tray. But more generally, it should be a vector from your origin fiducial to your secondary fiducial with respect to itself. That's why the x component is generally 0, and the y component is the distance between the two fiducials.  
+* P1 Center, P1O, P2 Center, and P2M: These are the tray pin measurements. First establish your tray fiducial based coordinate system. Then measure the Center Pin, and Off Center Pin of your tray. Fill in P1 Center with your center pin measurement, and fill in P1O with your Off Center Pin measurement. Leave P2 points blank. 
+* The Last Five: date_meas, time_meas, inspector, institution, and comment sections are all for keeping track of who did the tray measurements and when. Fill them out by matching the format they're in in the example. These can be uploaded to HGCAL Database as well, but only for once.
+
+### Troubleshooting the program
+#### Missing entries (data or header or the entire txt file)
 1. Check if OGP survey program is properly named. Spaces are very likely to cause parsing issues and therefore should be avoided. 
 Correct Example: `CMU_OGP_module_survey_2024`
 2. Check if the routines are reporting results to Files. Turn Results for (X, Y, Z) on, and change the system setting to Link Results to Files. Do this for user input variables as well.
 3. Check if the file output routine has filter applied. Uncheck the option.
 
-### Template change
+#### Template change
 - If the template is changed, how data is parsed from the OGP output files will also need to be modified accordingly in `src/param.py`.
 - The meta data needs to follow the format: 
   ```

@@ -1,0 +1,160 @@
+               
+Step1_3_HB_inspection_V3_per_QC_HiQ
+LastModified: 04:01:25 13:44:58		
+Runtime: 04:01:25 13:58:27
+Component ID: 320XLF44MH00105 
+Operator: Opaglian   
+Geometry: Full
+Density: LD
+Sensor size:  
+Flatness: 1.102
+Thickness: 1.943
+Thickness_Offset: 
+Position ID: 1
+TrayNo: 1
+Comment: 
+---
+Point Point1
+Point        80.00000000000        0.00100000000        1.60517215465
+    
+Point Point2
+Point        80.00000000009        5.26053310292        1.65479975517
+    
+Circle center_hole
+Point        79.90346850180       -0.01479949720        0.92157532783
+direction cosine:       -0.00039674581       -0.00007435945       -0.99999991853
+Radius                0.9845
+Line top_edge
+Point        76.92689417493       83.44349488437        1.35713204919
+direction cosine:        0.99993250251       -0.00001089995       -0.01161853284
+Circle fiducial4
+Point       114.97309844288      -79.98501805949        1.92226088677
+direction cosine:        0.00010496342        0.00037765507        0.99999992318
+Radius                0.2115
+Circle fiducial3
+Point       159.98825176143       -0.00000224302        1.81985018556
+direction cosine:        0.00005591251        0.00022445353        0.99999997325
+Radius                0.2090
+Circle fiducial2
+Point       114.99932330896       79.99117044450        1.45619396525
+direction cosine:       -0.00032029526       -0.00026599550        0.99999991333
+Radius                0.2105
+Circle fiducial1
+Point        45.00462696158       80.00373155442        2.34039421300
+direction cosine:       -0.00049315243        0.00080016175        0.99999955827
+Radius                0.2117
+Circle fiducial6
+Point         0.00000288406       -0.00000205154        2.23443309816
+direction cosine:        0.00015454575       -0.00060583033        0.99999980454
+Radius                0.2105
+Circle fiducial5
+Point        44.99578907818      -79.98038445610        1.39382328097
+direction cosine:        0.00028594679        0.00009883451        0.99999995423
+Radius                0.2120
+Line BottomEdge
+Point        76.48304440893      -83.28294286323        1.60526508274
+direction cosine:       -0.99999999287       -0.00011838800       -0.00001565939
+Line LowerRight
+Point       149.54625407536      -46.00055727596        1.60483402536
+direction cosine:        0.50014941678        0.86593912073       -0.00000931435
+Line UpperRight
+Point       151.85742269623       42.12609584640        1.60606074288
+direction cosine:       -0.50009949854        0.86596795058       -0.00001128361
+Line TopEdge
+Point        80.85706182078       83.41839984676        1.53367493772
+direction cosine:        0.99998920192        0.00011733604       -0.00464567171
+Line UpperLeft
+Point         5.98046976380       38.78792250397        1.60559722494
+direction cosine:       -0.50006357195       -0.86598869739        0.00000195505
+Line LowerLeft
+Point         8.86028112219      -43.62109454785        1.60534658531
+direction cosine:        0.50048097188       -0.86574753319       -0.00007463057
+Width ToptoBottom
+Point        78.77992956969        0.06774015642        1.56896073992
+Width UpperLtoLowerR
+Point        77.80920044874       -3.52694556276        1.60521543663
+Width UpperRtoLowerL
+Point        80.36190925788       -0.75279141383        1.60570372791
+Circle MaxInscribeCircle
+Point        79.86492424972        0.08343154651        1.59292695841
+direction cosine:        0.00012432311        0.00027305234        0.99999995499
+Radius               83.3613
+Point flatness1
+Point        40.10543535608       81.25408342482        2.41727114704
+    
+Point flatness2
+Point        89.13207187061       81.67259800769        1.76647667570
+    
+Point flatness3
+Point       122.95353772762       81.81123379751        1.37059475683
+    
+Point flatness4
+Point       131.85890007797       73.78859066752        1.39797062926
+    
+Point flatness5
+Point       147.60471224705       40.89155129286        1.66089161640
+    
+Point flatness6
+Point       169.39962908788        8.84734603508        1.89313951655
+    
+Point flatness7
+Point       172.58155110189       -3.82186311310        1.94234281569
+    
+Point flatness8
+Point       144.62651915067      -50.26854338484        2.17560445877
+    
+Point flatness9
+Point       129.80126480280      -78.64348240301        2.01824287680
+    
+Point flatness10
+Point       117.89918364273      -81.56957541545        2.01182609836
+    
+Point flatness11
+Point        82.45210778181      -81.56652157489        1.67501119753
+    
+Point flatness12
+Point        42.53029228424      -81.61280641931        1.39265348697
+    
+Point flatness13
+Point        30.67022863426      -78.00856105187        1.25994722622
+    
+Point flatness14
+Point        10.50027198166      -41.82823464254        1.70412652934
+    
+Point flatness15
+Point       -12.54904877703       -3.67024405267        2.28169375802
+    
+Point flatness16
+Point        -9.84463538919        7.62585398330        2.47197837263
+    
+Point flatness17
+Point        11.62919222240       44.76344068140        2.63528071127
+    
+Point flatness18
+Point        27.51125429444       72.16583123851        2.57366331253
+    
+Point flatness19
+Point        90.44558506320       44.91396819704        1.87700014597
+    
+Point flatness20
+Point       124.25633939077       15.15301755037        1.84753293212
+    
+Point flatness21
+Point       116.52979837500      -33.59183478132        2.04282756960
+    
+Point flatness22
+Point        81.98695624853      -35.89334847848        1.94635497809
+    
+Point flatness23
+Point        32.43054667284      -24.24346033299        2.01405372979
+    
+Point flatness24
+Point        39.27132333217       26.07508176384        2.27830246726
+    
+Point flatness25
+Point        82.00435136360        2.86538741365        1.92509870004
+    
+Plane ExtractedSurfacePoints
+Point        80.63149474176       -0.51561966388        1.94319542835
+direction cosine:        0.00242650234       -0.00143922638        0.99999602035
+     
