@@ -1,0 +1,109 @@
+               
+Step1_2_BP_inspection_CuW
+LastModified: 07:21:25 10:58:23		
+Runtime: 07:21:25 11:34:57
+Component ID: 320BAFLWKA00221 
+Operator: jepicard   
+Geometry: full
+Density: ld
+Sensor size: None 
+Flatness: 0.100
+Thickness1: 1.85
+Thickness2: 1.79
+Thickness3: 1.76
+Thickness4: 1.81
+Thickness5: 1.85
+Thickness6: 1.79
+Thickness_Offset: 0.15
+Position ID: 1
+TrayNo: 1
+Comment: n/a
+---
+Point BacksideSurface1
+Point        44.46915170012       81.32752745671        1.84299974807
+    
+Point BacksideSurface2
+Point        -0.03618400940       80.78538093862        1.86169693826
+    
+Point BacksideSurface3
+Point       -44.20824340907       81.93880609432        1.87035201608
+    
+Point BacksideSurface4
+Point       -48.33612274351       78.20577206137        1.87282359797
+    
+Point BacksideSurface5
+Point       -69.27781546741       42.21458907097        1.88848783769
+    
+Point BacksideSurface6
+Point       -85.01271961406        3.08527998011        1.91533538010
+    
+Point BacksideSurface7
+Point       -77.85487728588       -1.85594686391        1.91048641555
+    
+Point BacksideSurface8
+Point       -70.52927835048      -39.17860188665        1.88622695816
+    
+Point BacksideSurface9
+Point       -48.50422800651      -79.76326235132        1.83386868829
+    
+Point BacksideSurface10
+Point       -43.39312376173      -82.08956602174        1.82746345383
+    
+Point BacksideSurface11
+Point         0.87029348024      -81.71113041832        1.82391993451
+    
+Point BacksideSurface12
+Point        43.98200560354      -82.17351285944        1.83333458511
+    
+Point BacksideSurface13
+Point        49.31605530595      -79.65071076466        1.85464390197
+    
+Point BacksideSurface14
+Point        71.39111282397      -38.95354128958        1.92217609391
+    
+Point BacksideSurface15
+Point        84.06823299792       -3.01364332632        1.94322699840
+    
+Point BacksideSurface16
+Point        84.99757073219        2.58387416766        1.94137147535
+    
+Point BacksideSurface17
+Point        71.86010385652       38.48277397981        1.90836478152
+    
+Point BacksideSurface18
+Point        49.32148809573       79.13553592694        1.84496188401
+    
+Point BacksideSurface19
+Point         0.49028260885       45.37716305349        1.87704399077
+    
+Point BacksideSurface20
+Point       -35.06917269010       23.01161459628        1.89226376333
+    
+Point BacksideSurface21
+Point       -34.42413189106      -22.67301533214        1.88876360805
+    
+Point BacksideSurface22
+Point        -0.57863401484      -50.48756645944        1.86573996814
+    
+Point BacksideSurface23
+Point        37.65233124534      -21.35311480419        1.89411723982
+    
+Point BacksideSurface24
+Point        36.67457712649       21.50022295517        1.89419101893
+    
+Point BacksideSurface25
+Point         0.04945574721        3.11678252949        1.88689598621
+    
+Plane PlaneOfBackSurface
+Point         0.71672520320       -0.08553158267        1.87923025056
+direction cosine:       -0.00011605801       -0.00012991898        0.99999998483
+Line TopLine
+Point         7.18552530135       83.53311873647        0.25839328677
+direction cosine:        0.99999955973       -0.00081845179        0.00045898448
+Distance SlotCircleDistance
+Point                                                                
+direction cosine:                                                               
+Distance OverallWidth
+Point                                                                
+direction cosine:                                                               
+     
