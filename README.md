@@ -88,10 +88,10 @@ Notice that the tray files provided in the directory have different pin position
 ### Details on surveying LD Full assembly trays as an example
 Take a look at [tray_example_LD_Full.yaml](rwOGP//templates/trays/tray_example_LD_Full.yaml), you'll have to fill out a tray file like this one for each position:
 
-* Tray Number: This is the "Name" of the Assembly Tray. I suggest calling them something like "101" & "102" where the "10_" is the assembly tray and the "__1" is the position of the assembly tray.
+* Tray Number: This is the "Name" of the Assembly Tray. For easy of parsing, it's recommended to name them like "101" & "102" where the "10_" is the assembly tray and the "__1" is the position of the assembly tray.
 *  Tray Name: Just call it "Tray _". (Fill in the blank with your tray number)
 In the module_geoms section, you'll put "  ['LDF']  " because you're only making LD Full modules. 
-* Tray Fiducial: This is the secondary tray fiducial location, for us this is the top left corner of our assembly tray. But more generally, it should be a vector from your origin fiducial to your secondary fiducial with respect to itself. That's why the x component is generally 0, and the y component is the distance between the two fiducials.  
+* Tray Fiducial: This is the secondary tray fiducial location. For correct angular offset calculation it should be the top left corner of the assembly tray. More generally, it should be a vector from your origin fiducial to your secondary fiducial with respect to itself. That's why the x component is generally 0, **and** the y component is the distance between the two fiducials.  
 * P1 Center, P1O, P2 Center, and P2M: These are the tray pin measurements. First establish your tray fiducial based coordinate system. Then measure the Center Pin, and Off Center Pin of your tray. Fill in P1 Center with your center pin measurement, and fill in P1O with your Off Center Pin measurement. Leave P2 points blank. 
 * The Last Five: date_meas, time_meas, inspector, institution, and comment sections are all for keeping track of who did the tray measurements and when. Fill them out by matching the format they're in in the example. These can be uploaded to HGCAL Database as well, but only for once.
 
