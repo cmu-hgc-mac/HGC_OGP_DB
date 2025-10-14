@@ -156,7 +156,7 @@ class SurveyProcessor():
                 logging.error(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
             self.print_db_msg(comp_type, compID)
-            if self.exclude_kwd is not None and self.exclude_kwd in compID:
+            if self.exclude_kwd is not None and self.exclude_kwd in compID.lower():
                 logging.info(f"Automatic dummy detections: Excluding {compID} from upload.")
                 continue
             status = await self.client.link_and_update_table(comp_params, db_upload)
@@ -166,8 +166,6 @@ class SurveyProcessor():
                 return False, last_successful_index
             last_successful_index = idx
         return True, last_successful_index  # Return True and last index if all files were processed successfully
-                # send2trash.send2trash(ex_file)
-            # print(f'Moved {ex_file} to recycle bin.')
         
     @staticmethod
     def print_db_msg(comp_type, modname):

@@ -131,7 +131,7 @@ if __name__ == "__main__":
     parser.add_argument("--updatedir", action='store_true', help="Update the directory paths for OGP outputs/processing in the configuration file.")
     parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload [baseplates/hexaboards/protomodules/modules]. If not specified, all components will be processed.")
     parser.add_argument("--debug", action='store_true', help="Print debug messages.")
-    parser.add_argument("--disable", action='store_true', help="Disable the program from uploading.")
+    parser.add_argument("--dryrun", action='store_true', help="Disable the program from uploading. Any new files created since last time this program was run will be processed, but not uploaded.")
     parser.add_argument("--test", action='store_true', help="Run the program in test mode on a selected file.")
 
     args = parser.parse_args()
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         test_workflow()
         sys.exit(0)
 
-    if not args.disable:
+    if not args.dryrun:
         asyncio.run(main_func(args.type))
     else:
         pass
