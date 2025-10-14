@@ -161,4 +161,7 @@ if __name__ == "__main__":
         test_workflow()
         sys.exit(0)
 
-    asyncio.run(main_func(args.type))
+    if not args.disable:
+        asyncio.run(main_func(args.type))
+    else:
+        pass
