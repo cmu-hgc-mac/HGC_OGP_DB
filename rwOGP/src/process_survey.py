@@ -34,6 +34,7 @@ class SurveyProcessor():
             os.makedirs(im_dir)
         self.im_dir = im_dir
         self.tray_dir = yamlconfig.get('ogp_tray_dir')
+        self.exclude_kwd = yamlconfig.get('dry_run_kwd', None)
         logging.debug(f"Using tray files from directory: {self.tray_dir}")
 
         self.client = DBClient(yamlconfig)
@@ -44,7 +45,7 @@ class SurveyProcessor():
         status, index = await self.process_and_upload(component_type)
         return status, index
  
-    async def __getArgs__(self, ex_file, meta_file, comp_type):
+    async def __getUploadData__(self, ex_file, meta_file, comp_type):
         """Get arguments for uploading to database, including the necessary meta data to upload and the image bytes.
         
         Return 
@@ -147,7 +148,7 @@ class SurveyProcessor():
         last_successful_index = -1
         for idx, (ex_file, meta_file) in enumerate(zip(self.OGPSurveyFile, self.MetaFile)):
             try: 
-                db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
+                db_upload, comp_params, compID = await self.__getUploadData__(ex_file, meta_file, comp_type)
             except ValueMissingError as e:
                 logging.error(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
@@ -155,6 +156,9 @@ class SurveyProcessor():
                 logging.error(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
             self.print_db_msg(comp_type, compID)
+            if self.exclude_kwd is not None and self.exclude_kwd in compID:
+                logging.info(f"Automatic dummy detections: Excluding {compID} from upload.")
+                continue
             status = await self.client.link_and_update_table(comp_params, db_upload)
             # status = await self.client.upload_PostgreSQL(comp_params, db_upload)
             if status == False:

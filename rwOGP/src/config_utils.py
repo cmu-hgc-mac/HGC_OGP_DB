@@ -5,6 +5,20 @@ from rich.logging import RichHandler
 from rich.console import Console
 from rich.theme import Theme
 
+DEFAULT_CONFIG = {
+        'host': 'localhost',
+        'database': 'hgcdb',
+        'user': 'ogp_user',
+        'password': 'hgcalpass',
+        'inst_code': 'CM',
+        'institution_name': 'Carnegie Mellon University',
+        'ogp_survey_dir': '/path/to/ogp/survey/directory',
+        'ogp_parsed_dir': '/path/to/ogp/parsed/directory',
+        'ogp_tray_dir': '/path/to/ogp/tray/directory',
+        'ogp_image_dir': '/path/to/ogp/image/directory',
+        'dry_run_kwd': 'dummy'
+    }
+
 def setup_logging(level=logging.INFO, show_time=True, show_path=False):
     """Set up logging with rich formatting and styling."""
     # Custom theme for rich
@@ -174,20 +188,6 @@ def get_config_location():
         os.makedirs(config_dir, exist_ok=True)
         return pjoin(config_dir, 'rwOGP_DBconfig.yaml')
 
-def get_default_config():
-    """Return the default configuration dictionary."""
-    return {
-        'host': 'localhost',
-        'database': 'hgcdb',
-        'user': 'ogp_user',
-        'password': 'hgcalpass',
-        'inst_code': 'CM',
-        'institution_name': 'Carnegie Mellon University',
-        'ogp_survey_dir': '/path/to/ogp/survey/directory',
-        'ogp_parsed_dir': '/path/to/ogp/parsed/directory',
-        'ogp_tray_dir': '/path/to/ogp/tray/directory',
-        'ogp_image_dir': '/path/to/ogp/image/directory',
-    }
 
 def verify_config(current_config):
     """
@@ -425,7 +425,7 @@ def create_default_config():
     
     print("Creating default configuration file...")
     with open(config_file, 'w') as f:
-        yaml.dump(get_default_config(), f, default_flow_style=False)
+        yaml.dump(DEFAULT_CONFIG, f, default_flow_style=False)
 
     print(f"Configuration file created at {config_file}")
     
