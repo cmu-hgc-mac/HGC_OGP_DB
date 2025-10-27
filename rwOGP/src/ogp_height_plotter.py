@@ -264,6 +264,27 @@ class PlotTool:
         table.add_column("Value", justify="right", style="green")
         table.add_column("Units", justify="left", style="yellow")
 
+        FDC_HOLEPOS = [FDCenter [0] - Hole[0] , FDCenter[1] - Hole[1]]
+        tolerance = 1e-6 # 1 micron in meters
+        xx_match = abs(FDC_HOLEPOS[0] - XOffset) < tolerance 
+        yy_match = abs(FDC_HOLEPOS[1] - YOffset) < tolerance
+
+        if np.sqrt(FDCenter[0]**2 + FDCenter [1]**2) < 250: #25cm = 250mm
+            yx_match = abs (FDC_HOLEPOS[1] - XOffset) < tolerance 
+            xy_match = abs (FDC_HOLEPOS[0] + YOffset) < tolerance
+        else:
+            yx_match = abs(FDC_HOLEPOS[1] - XOffset) < tolerance 
+            xy_match = abs (FDC_HOLEPOS[0] + YOffset) < tolerance
+        if yx_match and xy_match:
+            if np.sqrt(FDCenter[0]**2 + FDCenter[1]**2) < 250: 
+                table.add_row("Relative To:", "P1-Channel 1")
+            else:
+                table.add_row("Relative To:", "P2-Channel 1")
+        elif xx_match and yy_match:
+            table.add_row("Relative To:", "Assembly Tray")
+        else:
+            table.add_row("Relative To:", "Unknown")
+
         # Add measurements to the table
         table.add_row("Hole Position", f"({Hole[0]:.3f}, {Hole[1]:.3f})", "mm")
         table.add_row("FD Center", f"({FDCenter[0]:.3f}, {FDCenter[1]:.3f})", "mm")

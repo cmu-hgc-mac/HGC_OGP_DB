@@ -60,6 +60,7 @@ class SurveyProcessor():
 
         if singular_type == 'protomodule': 
             compID = compID.replace('ML', 'PL', 1)
+            compID = compID.replace('MH', 'PH', 1)
             metadata['ComponentID'] = compID
             
         df = pd.read_csv(ex_file)
