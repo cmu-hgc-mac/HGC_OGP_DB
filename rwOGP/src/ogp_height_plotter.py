@@ -213,6 +213,8 @@ class PlotTool:
         - `YOffset`: y-offset of the sensor from the tray center"""
 
         geometry, density, position, CompType = self.meta['Geometry'], self.meta['Density'], self.meta['PositionID'], self.comp_type
+        flatness, ComponentID = self.meta['Flatness'], self.meta['ComponentID']
+        z_points = self.features['Z_coordinate']
 
         holeX, holeY = holeXY
         slotX, slotY = slotXY
@@ -264,6 +266,7 @@ class PlotTool:
         table.add_column("Value", justify="right", style="green")
         table.add_column("Units", justify="left", style="yellow")
 
+        #Refrence Frame Labeling Function (works for HDFULL@UCSB)
         FDC_HOLEPOS = [FDCenter [0] - Hole[0] , FDCenter[1] - Hole[1]]
         tolerance = 1e-6 # 1 micron in meters
         xx_match = abs(FDC_HOLEPOS[0] - XOffset) < tolerance 
@@ -290,6 +293,48 @@ class PlotTool:
         table.add_row("FD Center", f"({FDCenter[0]:.3f}, {FDCenter[1]:.3f})", "mm")
         table.add_row("X Offset", f"{XOffset*1000:.1f}", "μm")
         table.add_row("Y Offset", f"{YOffset*1000:.1f}", "μm")
+
+        #Flatness Flagging 
+        if CompType == 'module' and isinstance(flatness, (int, float)):
+            if flatness <= 0.100:
+                flag = 'Flat'
+            elif flatness <= 0.140:
+                flag = 'Acceptable'
+            elif flatness <= 0.180:
+                flag = 'Less Flat!'
+            else:
+                flag = '!!NOT FLAT!!'
+            table.add_row(f"Flatness:", f"{flag} ({flatness})")
+        else:
+            table.add_row("Flatness:", "N/A or invalid flatness")
+
+
+        #Height Points Flagging
+        if CompType == 'module':
+            layer, material = int(ComponentID[6]), ComponentID[7]
+            if layer == 1:
+                if material == 'T':
+                    expected = 3.05
+                elif material == 'W':
+                    expected = 3.45
+
+            elif layer == 2:
+                if material == 'T':
+                    expected = 2.95
+                elif material == 'W':
+                    expected = 3.35
+
+            elif layer == 3:
+                if material == 'T':
+                    expected = 3.05
+                elif material == 'W':
+                    expected = 3.45
+
+            if expected is not None:
+                if sum(1 for z in z_points if z > (expected + 0.150)) >= 3:
+                    table.add_row("Height Flag:", "!! High Values !!")
+            else:
+                table.add_row("Height Flag:", "Unknown or Dummy")
 
 
         CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
