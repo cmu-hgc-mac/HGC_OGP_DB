@@ -35,6 +35,7 @@ class PlotTool:
         self.x_points = self.features['X_coordinate']
         self.y_points = self.features['Y_coordinate']
         self.z_points = self.features['Z_coordinate']
+        self.datalabels = self.features['FeatureName']
 
         self.__check_save_dir()
     

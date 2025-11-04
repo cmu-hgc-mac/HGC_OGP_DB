@@ -70,7 +70,7 @@ class SurveyProcessor():
         logging.info("=" * 100)
         logging.info(f"###### Calculating offsets for {comp_type} {compID} #######")
 
-        
+        fd_indices = [i for i, label in enumerate(plotter.datalabels) if "FD" in label]
         component_params = COMPONENT_PARAMS[singular_type]
         name_field = f'{COMP_PREFIX[singular_type]}_name'
         db_upload = {name_field: compID}
@@ -97,16 +97,16 @@ class SurveyProcessor():
         elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             report_thick = metadata.get("Thickness", None)
+            z_points_filtered = [z for i, z in enumerate(plotter.z_points) if i not in fd_indices and z >= 0]
             if report_thick is None:
                 logging.warning(f"No Thickness value found in metadata for {compID}. Using average thickness from OGP data: {report_thick}")
-                z_points_filtered = [z for z in plotter.z_points if z >= 0]
                 if z_points_filtered:
                     report_thick = np.round(np.mean(z_points_filtered), 3)
                     logging.warning(f"No Thickness value found in metadata for {compID}. Using average of non-negative OGP z_points: {report_thick}")
                 else:
                     logging.warning(f"No valid (non-negative) z_points found for {compID}.")
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              "weight_grams": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3), "flatness": np.round(metadata['Flatness'],3),
+                              "weight_grams": metadata.get('Weight', None), 'max_thickness': np.round(np.max(z_points_filtered),3), "flatness": np.round(metadata['Flatness'],3),
                              'avg_thickness': report_thick, 'grade': grade((XOffset, YOffset), AngleOff)})
             if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
@@ -128,9 +128,13 @@ class SurveyProcessor():
         logging.debug(f"###### Generating Image for {compID} #######")
         
         im_bytes = plotter(**im_args)
+        
+        x_filtered = [x for i, x in enumerate(plotter.x_points) if i not in fd_indices]
+        y_filtered = [y for i, y in enumerate(plotter.y_points) if i not in fd_indices]
+        z_filtered = [z for i, z in enumerate(plotter.z_points) if i not in fd_indices]
 
-        db_upload.update({'x_points':(plotter.x_points).tolist(), 'y_points':(plotter.y_points).tolist(), 
-            'z_points':(plotter.z_points).tolist(),'hexplot':im_bytes, 'inspector': metadata['Operator'], 'comment':metadata.get("Comment", None)})
+        db_upload.update({'x_points':(x_filtered), 'y_points':(y_filtered), 
+            'z_points':(z_filtered),'hexplot':im_bytes, 'inspector': metadata['Operator'], 'comment':metadata.get("Comment", None)})
         
         db_upload.update(self.getDateTime(metadata))
 
