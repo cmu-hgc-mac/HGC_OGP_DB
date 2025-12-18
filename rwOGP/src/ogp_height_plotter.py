@@ -215,6 +215,8 @@ class PlotTool:
 
         geometry, density, position, CompType = self.meta['Geometry'], self.meta['Density'], self.meta['PositionID'], self.comp_type
         flatness, ComponentID = self.meta['Flatness'], self.meta['ComponentID']
+        comp_type_ogp = CompType
+
         z_points = self.features['Z_coordinate']
 
         holeX, holeY = holeXY
@@ -268,7 +270,7 @@ class PlotTool:
         table.add_column("Units", justify="left", style="yellow")
 
         #Refrence Frame Labeling Function (works for HDFULL@UCSB)
-        FDC_HOLEPOS = [FDCenter [0] - Hole[0] , FDCenter[1] - Hole[1]]
+        FDC_HOLEPOS = [FDCenter [0] - Hole[0] - adjustmentX, FDCenter[1] - Hole[1] - adjustmentY]
         tolerance = 1e-6 # 1 micron in meters
         xx_match = abs(FDC_HOLEPOS[0] - XOffset) < tolerance 
         yy_match = abs(FDC_HOLEPOS[1] - YOffset) < tolerance
@@ -281,11 +283,11 @@ class PlotTool:
             xy_match = abs (FDC_HOLEPOS[0] + YOffset) < tolerance
         if yx_match and xy_match:
             if np.sqrt(FDCenter[0]**2 + FDCenter[1]**2) < 250: 
-                table.add_row("Relative To:", "P1-Channel 1")
+                table.add_row("Relative To:", "P1-Channel 1", 'Cassette')
             else:
-                table.add_row("Relative To:", "P2-Channel 1")
+                table.add_row("Relative To:", "P2-Channel 1", 'Cassette')
         elif xx_match and yy_match:
-            table.add_row("Relative To:", "Assembly Tray")
+            table.add_row("Relative To:", "Assembly Tray", "MACs")
         else:
             table.add_row("Relative To:", "Unknown")
 
@@ -308,9 +310,9 @@ class PlotTool:
                     flag = 'Less Flat!'
                 else:
                     flag = '!!NOT FLAT!!'
-                table.add_row(f"Flatness:", f"{flag} ({flatness})")
+                table.add_row(f"Flatness:", f"{flag} ({flatness})", 'mm')
             else:
-                table.add_row("Flatness:", "N/A or invalid flatness")
+                table.add_row("Flatness:", "N/A or invalid flatness", 'mm')
 
 
             #Height Points Flagging

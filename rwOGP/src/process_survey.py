@@ -110,8 +110,8 @@ class SurveyProcessor():
                     logging.warning(f"No Thickness value found in metadata for {compID}. "
                         f"Using average of non-negative OGP z_points: {report_thick}")
                 else:
-                    if comp_type == 'module': report_thick = 3.00; 
-                    else: report_thick = 1.70;
+                    if comp_type == 'module': report_thick = 3.00
+                    else: report_thick = 1.70
                     logging.warning(f"No valid (non-negative) z_points found for {compID}.")
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               "weight_grams": metadata.get('Weight', None), 'max_thickness': report_thick, "flatness": np.round(metadata['Flatness'],3),
