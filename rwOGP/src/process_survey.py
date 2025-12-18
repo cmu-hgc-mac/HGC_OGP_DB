@@ -100,13 +100,21 @@ class SurveyProcessor():
             z_points_filtered = [z for i, z in enumerate(plotter.z_points) if i not in fd_indices and z >= 0]
             if report_thick is None:
                 logging.warning(f"No Thickness value found in metadata for {compID}. Using average thickness from OGP data: {report_thick}")
-                if z_points_filtered:
+                """if z_points_filtered:
                     report_thick = np.round(np.mean(z_points_filtered), 3)
                     logging.warning(f"No Thickness value found in metadata for {compID}. Using average of non-negative OGP z_points: {report_thick}")
                 else:
+                    logging.warning(f"No valid (non-negative) z_points found for {compID}.")"""
+                if z_points_filtered is not None and z_points_filtered.size > 0:
+                    report_thick = np.round(np.mean(z_points_filtered), 3)
+                    logging.warning(f"No Thickness value found in metadata for {compID}. "
+                        f"Using average of non-negative OGP z_points: {report_thick}")
+                else:
+                    if comp_type == 'module': report_thick = 3.00; 
+                    else: report_thick = 1.70;
                     logging.warning(f"No valid (non-negative) z_points found for {compID}.")
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              "weight_grams": metadata.get('Weight', None), 'max_thickness': np.round(np.max(z_points_filtered),3), "flatness": np.round(metadata['Flatness'],3),
+                              "weight_grams": metadata.get('Weight', None), 'max_thickness': report_thick, "flatness": np.round(metadata['Flatness'],3),
                              'avg_thickness': report_thick, 'grade': grade((XOffset, YOffset), AngleOff)})
             if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
