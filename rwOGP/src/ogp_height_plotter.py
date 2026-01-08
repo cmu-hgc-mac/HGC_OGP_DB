@@ -312,7 +312,13 @@ class PlotTool:
                     flag = '!!NOT FLAT!!'
                 table.add_row(f"Flatness:", f"{flag} ({flatness})", 'mm')
             else:
-                table.add_row("Flatness:", "N/A or invalid flatness", 'mm')
+                if flatness <= 0.100:
+                    flag = 'Flat'
+                elif flatness <= 0.140:
+                    flag = 'Less Flat!'
+                else:
+                    flag = '!!NOT FLAT!!'    
+                table.add_row(f"Flatness:", f"{flag} ({flatness})", 'mm')
 
 
             #Height Points Flagging
