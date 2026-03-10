@@ -368,6 +368,13 @@ class PlotTool:
 
         table.add_row("Angle Offset", f"{AngleOffset:.5f}", "degrees")
         table.add_row("Center Offset", f"{CenterOffset*1000:.1f}", "μm")
+        
+        if CenterOffset < -1.1*AngleOffset + 0.551:
+            if CenterOffset < -9.74*AngleOffset + 0.274:
+                print("Placement", "Usable", "GREEN")
+            else:
+                table.add_row("Placement", "Caution", "YELLOW")
+        else: table.add_row("Placement", "!!RED FLAG!!", "RED")
 
         console.print(table)
 
