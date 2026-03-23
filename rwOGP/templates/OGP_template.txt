@@ -8,17 +8,11 @@ Geometry: {$Geometry}
 Density: {$Density}
 Sensor size: {$Sensorsize} 
 Flatness: {$Flatness}
-Thickness1: {#Thickness1}
-Thickness2: {#Thickness2}
-Thickness3: {#Thickness3}
-Thickness4: {#Thickness4}
-Thickness5: {#Thickness5}
-Thickness6: {#Thickness6}
-Thickness_Offset: {#Thickness_Offset}
+Thickness: {$Thickness}
+Thickness_Offset: {$Thickness_Offset}
 Position ID: {$PositionID}
 TrayNo: {$TrayNo}
 Comment: {$Comment}
-Weight: {#Weight}
 ---
 </reportheader>
 
