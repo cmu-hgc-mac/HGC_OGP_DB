@@ -669,10 +669,15 @@ def grade(CenterOffset, AngleOff):
     X_Offset, Y_Offset = CenterOffset
     X_Offset *= 1000
     Y_Offset *= 1000
+
+    print(f"X Offset: {X_Offset:.1f} μm; Y Offset: {Y_Offset:.1f} μm; Angle Offset: {AngleOff:.3f} degrees")
+    print("this LDB used grade(), and was passed, ", CenterOffset, AngleOff)
     
-    if X_Offset <= 50 and Y_Offset <= 50 and AngleOff <= 0.02:
+    if abs(X_Offset) <= 50 and abs(Y_Offset) <= 50 and abs(AngleOff) <= 0.02:
         return "A"
-    elif X_Offset <= 100 and Y_Offset <= 100 and AngleOff <= 0.04:
+    elif abs(X_Offset) <= 100 and abs(Y_Offset) <= 100 and abs(AngleOff) <= 0.04:
         return "B"
     else:
         return "C"
+
+
