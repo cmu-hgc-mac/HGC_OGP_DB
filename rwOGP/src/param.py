@@ -2,6 +2,17 @@ from colorama import Fore
 import numpy as np
 import logging
 
+class AngleFunc:
+    last_used = None  # <--- add this
+
+    def __init__(self, func, name):
+        self.func = func
+        self.name = name
+
+    def __call__(self, *args, **kwargs):
+        AngleFunc.last_used = self.name
+        return self.func(*args, **kwargs)
+
 baseplates_params = {"vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', 
                      "mother_table": 'baseplate', "prefix": 'bp'}
 hexaboards_params = {"vmini": 1.2, "vmaxi": 2.9, "new_angle": 0, "db_table_name": 'hxb_inspect', 
@@ -69,49 +80,108 @@ ADJUSTMENTS = {
 }
 
 
-# Define the angle calculation of FD points
 ANGLE_CALC_CONFIG = {
-    'Bottom':  {
-        1: lambda fd3to1, *_: calc_basic_angle(-fd3to1),
-        2: lambda fd3to1, *_: calc_basic_angle(fd3to1),
+    'Bottom': {
+        1: AngleFunc(
+            lambda fd3to1, *_: calc_basic_angle(-fd3to1),
+            "Bottom → density 1 → calc_basic_angle(-fd3to1)"
+        ),
+        2: AngleFunc(
+            lambda fd3to1, *_: calc_basic_angle(fd3to1),
+            "Bottom → density 2 → calc_basic_angle(fd3to1)"
+        ),
     },
+
     'Top': {
         'LD': {
-            1: lambda fd3to1, *_: calc_basic_angle(-fd3to1),
-            2: lambda fd3to1, *_: calc_basic_angle(fd3to1),
+            1: AngleFunc(
+                lambda fd3to1, *_: calc_basic_angle(-fd3to1),
+                "Top LD → pos 1 → calc_basic_angle(-fd3to1)"
+            ),
+            2: AngleFunc(
+                lambda fd3to1, *_: calc_basic_angle(fd3to1),
+                "Top LD → pos 2 → calc_basic_angle(fd3to1)"
+            ),
         },
         'HD': {
-            1: lambda fd3to1, *_: calc_basic_angle(-fd3to1),
-            2: lambda fd3to1, *_: calc_basic_angle(fd3to1),
+            1: AngleFunc(
+                lambda fd3to1, *_: calc_basic_angle(-fd3to1),
+                "Top HD → pos 1 → calc_basic_angle(-fd3to1)"
+            ),
+            2: AngleFunc(
+                lambda fd3to1, *_: calc_basic_angle(fd3to1),
+                "Top HD → pos 2 → calc_basic_angle(fd3to1)"
+            ),
         }
     },
+
     'Five': {
-        1: lambda fd3to1, fdpoints, comp_type: calc_five_angle(fdpoints, fd3to1, comp_type),
-        2: lambda fd3to1, fdpoints, comp_type: calc_five_angle(fdpoints, fd3to1, comp_type, True),
+        1: AngleFunc(
+            lambda fd3to1, fdpoints, comp_type:
+                calc_five_angle(fdpoints, fd3to1, comp_type),
+            "Five → pos 1 → calc_five_angle(is_second=False)"
+        ),
+        2: AngleFunc(
+            lambda fd3to1, fdpoints, comp_type:
+                calc_five_angle(fdpoints, fd3to1, comp_type, True),
+            "Five → pos 2 → calc_five_angle(is_second=True)"
+        ),
     },
+
     'Left': {
         'LD': {
-            1: lambda fd3to1, *_: calc_semi_angle(fd3to1),
-            2: lambda fd3to1, *_: calc_semi_angle(fd3to1, True),
+            1: AngleFunc(
+                lambda fd3to1, *_: calc_semi_angle(fd3to1),
+                "Left LD → pos 1 → calc_semi_angle(is_second=False)"
+            ),
+            2: AngleFunc(
+                lambda fd3to1, *_: calc_semi_angle(fd3to1, True),
+                "Left LD → pos 2 → calc_semi_angle(is_second=True)"
+            ),
         }
     },
+
     'Right': {
         'LD': {
-            1: lambda fd3to1, *_: calc_semi_angle(fd3to1),
-            2: lambda fd3to1, *_: calc_semi_angle(-fd3to1),
+            1: AngleFunc(
+                lambda fd3to1, *_: calc_semi_angle(fd3to1),
+                "Right LD → pos 1 → calc_semi_angle(is_second=False)"
+            ),
+            2: AngleFunc(
+                lambda fd3to1, *_: calc_semi_angle(-fd3to1),
+                "Right LD → pos 2 → calc_semi_angle(-fd3to1)"
+            ),
         }
     },
+
     'Full': {
         'HD': {
-            1: lambda fd3to1, fdpoints, *_: calc_HDfull_angle(fdpoints, None),
-            2: lambda fd3to1, fdpoints, *_: calc_HDfull_angle(fdpoints, None, True),
+            1: AngleFunc(
+                lambda fd3to1, fdpoints, *_:
+                    calc_HDfull_angle(fdpoints, None),
+                "Full HD → pos 1 → calc_HDfull_angle(is_second=False)"
+            ),
+            2: AngleFunc(
+                lambda fd3to1, fdpoints, *_:
+                    calc_HDfull_angle(fdpoints, None, True),
+                "Full HD → pos 2 → calc_HDfull_angle(is_second=True)"
+            ),
         },
         'LD': {
-            1: lambda fd3to1, fdpoints, comp_type: calc_full_angle(fdpoints, comp_type),
-            2: lambda fd3to1, fdpoints, comp_type: calc_full_angle(fdpoints, comp_type, True),
+            1: AngleFunc(
+                lambda fd3to1, fdpoints, comp_type:
+                    calc_full_angle(fdpoints, comp_type),
+                "Full LD → pos 1 → calc_full_angle(is_second=False)"
+            ),
+            2: AngleFunc(
+                lambda fd3to1, fdpoints, comp_type:
+                    calc_full_angle(fdpoints, comp_type, True),
+                "Full LD → pos 2 → calc_full_angle(is_second=True)"
+            ),
         }
     }
 }
+
 
 def calc_ref_angle(pinx, pinY, sign):
     if sign == 1:
@@ -220,7 +290,7 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
     """Calculate the angle deviation for PM/Modules with Full geometry."""
     sign = -1 if is_second else 1
     if comp_type == 'protomodule':
-        points_diff = fdpoints[4] - fdpoints[0] # vector from FD1 to FD5
+        points_diff = fdpoints[3] - fdpoints[0] # vector from FD1 to FD4
         angle = np.degrees(np.arctan2(
             sign * points_diff[1],
             sign * points_diff[0]))

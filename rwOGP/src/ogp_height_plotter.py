@@ -6,7 +6,7 @@ from rich.table import Table
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_CALC_CONFIG, fd_maps
+from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_CALC_CONFIG, fd_maps, AngleFunc
 
 pjoin = os.path.join
 
@@ -368,6 +368,11 @@ class PlotTool:
 
         table.add_row("Angle Offset", f"{AngleOffset:.5f}", "degrees")
         table.add_row("Center Offset", f"{CenterOffset*1000:.1f}", "μm")
+
+        if AngleFunc.last_used:
+            table.add_row("Angle Function", AngleFunc.last_used, "")
+        else:
+            table.add_row("Angle Function", "Unknown", "")
         
         if CenterOffset < -1.1*AngleOffset + 0.551:
             if CenterOffset < -9.74*AngleOffset + 0.274:
@@ -670,8 +675,8 @@ def grade(CenterOffset, AngleOff):
     X_Offset *= 1000
     Y_Offset *= 1000
 
-    print(f"X Offset: {X_Offset:.1f} μm; Y Offset: {Y_Offset:.1f} μm; Angle Offset: {AngleOff:.3f} degrees")
-    print("this LDB used grade(), and was passed, ", CenterOffset, AngleOff)
+    #print(f"X Offset: {X_Offset:.1f} μm; Y Offset: {Y_Offset:.1f} μm; Angle Offset: {AngleOff:.3f} degrees")
+    #print("this LDB used grade(), and was passed, ", CenterOffset, AngleOff)
     
     if abs(X_Offset) <= 50 and abs(Y_Offset) <= 50 and abs(AngleOff) <= 0.02:
         return "A"

@@ -136,6 +136,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    logging.getLogger().setLevel(logging.DEBUG)
+    
     if args.debug:
         setup_logging(logging.INFO)
     else:
