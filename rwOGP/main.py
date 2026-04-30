@@ -23,7 +23,7 @@ The program will also update the inventory file to reflect the results that have
 
 Running without any arguments will process and upload all new surveys to the OGP database."""
 
-async def main_func(comp_type):
+async def main_func(comp_type, dryrun=False):
     """Main function to run the program."""
     settings = load_config()
     if settings is None:
@@ -42,7 +42,7 @@ async def main_func(comp_type):
             logging.warning(message)
             return
     
-    updater = InventoryUpdater(invent_path, config, comp_type)
+    updater = InventoryUpdater(invent_path, config, comp_type, dryrun=dryrun)
     await updater()
 
 def test_workflow():
@@ -163,7 +163,8 @@ if __name__ == "__main__":
         test_workflow()
         sys.exit(0)
 
-    if not args.dryrun:
-        asyncio.run(main_func(args.type))
+    if args.dryrun:
+        asyncio.run(main_func(args.type, dryrun=args.dryrun))
     else:
-        pass
+        asyncio.run(main_func(args.type))
+
