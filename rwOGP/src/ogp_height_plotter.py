@@ -6,7 +6,7 @@ from rich.table import Table
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_CALC_CONFIG, fd_maps
+from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_CALC_CONFIG, fd_maps, AngleFunc
 
 pjoin = os.path.join
 
@@ -35,6 +35,7 @@ class PlotTool:
         self.x_points = self.features['X_coordinate']
         self.y_points = self.features['Y_coordinate']
         self.z_points = self.features['Z_coordinate']
+        self.datalabels = self.features['FeatureName']
 
         self.__check_save_dir()
     
@@ -213,6 +214,10 @@ class PlotTool:
         - `YOffset`: y-offset of the sensor from the tray center"""
 
         geometry, density, position, CompType = self.meta['Geometry'], self.meta['Density'], self.meta['PositionID'], self.comp_type
+        flatness, ComponentID = self.meta['Flatness'], self.meta['ComponentID']
+        comp_type_ogp = CompType
+
+        z_points = self.features['Z_coordinate']
 
         holeX, holeY = holeXY
         slotX, slotY = slotXY
@@ -264,11 +269,84 @@ class PlotTool:
         table.add_column("Value", justify="right", style="green")
         table.add_column("Units", justify="left", style="yellow")
 
+        #Refrence Frame Labeling Function (works for HDFULL@UCSB)
+        FDC_HOLEPOS = [FDCenter [0] - Hole[0] - adjustmentX, FDCenter[1] - Hole[1] - adjustmentY]
+        tolerance = 1e-6 # 1 micron in meters
+        xx_match = abs(FDC_HOLEPOS[0] - XOffset) < tolerance 
+        yy_match = abs(FDC_HOLEPOS[1] - YOffset) < tolerance
+
+        if np.sqrt(FDCenter[0]**2 + FDCenter [1]**2) < 250: #25cm = 250mm
+            yx_match = abs (FDC_HOLEPOS[1] - XOffset) < tolerance 
+            xy_match = abs (FDC_HOLEPOS[0] + YOffset) < tolerance
+        else:
+            yx_match = abs(FDC_HOLEPOS[1] - XOffset) < tolerance 
+            xy_match = abs (FDC_HOLEPOS[0] + YOffset) < tolerance
+        if yx_match and xy_match:
+            if np.sqrt(FDCenter[0]**2 + FDCenter[1]**2) < 250: 
+                table.add_row("Relative To:", "P1-Channel 1", 'Cassette')
+            else:
+                table.add_row("Relative To:", "P2-Channel 1", 'Cassette')
+        elif xx_match and yy_match:
+            table.add_row("Relative To:", "Assembly Tray", "MACs")
+        else:
+            table.add_row("Relative To:", "Unknown")
+
         # Add measurements to the table
         table.add_row("Hole Position", f"({Hole[0]:.3f}, {Hole[1]:.3f})", "mm")
         table.add_row("FD Center", f"({FDCenter[0]:.3f}, {FDCenter[1]:.3f})", "mm")
         table.add_row("X Offset", f"{XOffset*1000:.1f}", "μm")
         table.add_row("Y Offset", f"{YOffset*1000:.1f}", "μm")
+
+        if len(ComponentID) != 15 or 'dummy' in ComponentID:
+            table.add_row(f"Dummy:", ComponentID)
+        else:
+            #Flatness Flagging 
+            if CompType == 'module' and isinstance(flatness, (int, float)):
+                if flatness <= 0.100:
+                    flag = 'Flat'
+                elif flatness <= 0.140:
+                    flag = 'Acceptable'
+                elif flatness <= 0.180:
+                    flag = 'Less Flat!'
+                else:
+                    flag = '!!NOT FLAT!!'
+                table.add_row(f"Flatness:", f"{flag} ({flatness})", 'mm')
+            else:
+                if flatness <= 0.100:
+                    flag = 'Flat'
+                elif flatness <= 0.140:
+                    flag = 'Less Flat!'
+                else:
+                    flag = '!!NOT FLAT!!'    
+                table.add_row(f"Flatness:", f"{flag} ({flatness})", 'mm')
+
+
+            #Height Points Flagging
+            if CompType == 'module':
+                layer, material = int(ComponentID[6]), ComponentID[7]
+                if layer == 1:
+                    if material == 'T':
+                        expected = 3.05
+                    elif material == 'W':
+                        expected = 3.45
+
+                elif layer == 2:
+                    if material == 'T':
+                        expected = 2.95
+                    elif material == 'W':
+                        expected = 3.35
+
+                elif layer == 3:
+                    if material == 'T':
+                        expected = 3.05
+                    elif material == 'W':
+                        expected = 3.45
+
+                if expected is not None:
+                    if sum(1 for z in z_points if z > (expected + 0.150)) >= 3:
+                        table.add_row("Height Flag:", "!! High Values !!")
+                else:
+                    table.add_row("Height Flag:", "Unknown or Dummy")
 
 
         CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
@@ -290,6 +368,18 @@ class PlotTool:
 
         table.add_row("Angle Offset", f"{AngleOffset:.5f}", "degrees")
         table.add_row("Center Offset", f"{CenterOffset*1000:.1f}", "μm")
+
+        if AngleFunc.last_used:
+            table.add_row("Angle Function", AngleFunc.last_used, "")
+        else:
+            table.add_row("Angle Function", "Unknown", "")
+        
+        if CenterOffset < -1.1*AngleOffset + 0.551:
+            if CenterOffset < -9.74*AngleOffset + 0.274:
+                print("Placement", "Usable", "GREEN")
+            else:
+                table.add_row("Placement", "Caution", "YELLOW")
+        else: table.add_row("Placement", "!!RED FLAG!!", "RED")
 
         console.print(table)
 
@@ -584,10 +674,15 @@ def grade(CenterOffset, AngleOff):
     X_Offset, Y_Offset = CenterOffset
     X_Offset *= 1000
     Y_Offset *= 1000
+
+    #print(f"X Offset: {X_Offset:.1f} μm; Y Offset: {Y_Offset:.1f} μm; Angle Offset: {AngleOff:.3f} degrees")
+    #print("this LDB used grade(), and was passed, ", CenterOffset, AngleOff)
     
-    if X_Offset <= 50 and Y_Offset <= 50 and AngleOff <= 0.02:
+    if abs(X_Offset) <= 50 and abs(Y_Offset) <= 50 and abs(AngleOff) <= 0.02:
         return "A"
-    elif X_Offset <= 100 and Y_Offset <= 100 and AngleOff <= 0.04:
+    elif abs(X_Offset) <= 100 and abs(Y_Offset) <= 100 and abs(AngleOff) <= 0.04:
         return "B"
     else:
         return "C"
+
+

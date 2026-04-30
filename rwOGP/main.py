@@ -23,7 +23,7 @@ The program will also update the inventory file to reflect the results that have
 
 Running without any arguments will process and upload all new surveys to the OGP database."""
 
-async def main_func(comp_type):
+async def main_func(comp_type, dryrun=False):
     """Main function to run the program."""
     settings = load_config()
     if settings is None:
@@ -42,7 +42,7 @@ async def main_func(comp_type):
             logging.warning(message)
             return
     
-    updater = InventoryUpdater(invent_path, config, comp_type)
+    updater = InventoryUpdater(invent_path, config, comp_type, dryrun=dryrun)
     await updater()
 
 def test_workflow():
@@ -131,11 +131,13 @@ if __name__ == "__main__":
     parser.add_argument("--updatedir", action='store_true', help="Update the directory paths for OGP outputs/processing in the configuration file.")
     parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload [baseplates/hexaboards/protomodules/modules]. If not specified, all components will be processed.")
     parser.add_argument("--debug", action='store_true', help="Print debug messages.")
-    parser.add_argument("--disable", action='store_true', help="Disable the program from uploading.")
+    parser.add_argument("--dryrun", action='store_true', help="Disable the program from uploading. Any new files created since last time this program was run will be processed, but not uploaded.")
     parser.add_argument("--test", action='store_true', help="Run the program in test mode on a selected file.")
 
     args = parser.parse_args()
 
+    logging.getLogger().setLevel(logging.DEBUG)
+    
     if args.debug:
         setup_logging(logging.INFO)
     else:
@@ -161,4 +163,8 @@ if __name__ == "__main__":
         test_workflow()
         sys.exit(0)
 
-    asyncio.run(main_func(args.type))
+    if args.dryrun:
+        asyncio.run(main_func(args.type, dryrun=args.dryrun))
+    else:
+        asyncio.run(main_func(args.type))
+

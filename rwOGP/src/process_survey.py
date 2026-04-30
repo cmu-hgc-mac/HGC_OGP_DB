@@ -34,6 +34,7 @@ class SurveyProcessor():
             os.makedirs(im_dir)
         self.im_dir = im_dir
         self.tray_dir = yamlconfig.get('ogp_tray_dir')
+        self.exclude_kwd = yamlconfig.get('dry_run_kwd', None)
         logging.debug(f"Using tray files from directory: {self.tray_dir}")
 
         self.client = DBClient(yamlconfig)
@@ -44,7 +45,7 @@ class SurveyProcessor():
         status, index = await self.process_and_upload(component_type)
         return status, index
  
-    async def __getArgs__(self, ex_file, meta_file, comp_type):
+    async def __getUploadData__(self, ex_file, meta_file, comp_type):
         """Get arguments for uploading to database, including the necessary meta data to upload and the image bytes.
         
         Return 
@@ -59,6 +60,7 @@ class SurveyProcessor():
 
         if singular_type == 'protomodule': 
             compID = compID.replace('ML', 'PL', 1)
+            compID = compID.replace('MH', 'PH', 1)
             metadata['ComponentID'] = compID
             
         df = pd.read_csv(ex_file)
@@ -68,7 +70,7 @@ class SurveyProcessor():
         logging.info("=" * 100)
         logging.info(f"###### Calculating offsets for {comp_type} {compID} #######")
 
-        
+        fd_indices = [i for i, label in enumerate(plotter.datalabels) if "FD" in label]
         component_params = COMPONENT_PARAMS[singular_type]
         name_field = f'{COMP_PREFIX[singular_type]}_name'
         db_upload = {name_field: compID}
@@ -95,16 +97,24 @@ class SurveyProcessor():
         elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             report_thick = metadata.get("Thickness", None)
+            z_points_filtered = [z for i, z in enumerate(plotter.z_points) if i not in fd_indices and z >= 0]
             if report_thick is None:
                 logging.warning(f"No Thickness value found in metadata for {compID}. Using average thickness from OGP data: {report_thick}")
-                z_points_filtered = [z for z in plotter.z_points if z >= 0]
-                if z_points_filtered:
+                """if z_points_filtered:
                     report_thick = np.round(np.mean(z_points_filtered), 3)
                     logging.warning(f"No Thickness value found in metadata for {compID}. Using average of non-negative OGP z_points: {report_thick}")
                 else:
+                    logging.warning(f"No valid (non-negative) z_points found for {compID}.")"""
+                if z_points_filtered is not None and z_points_filtered.size > 0:
+                    report_thick = np.round(np.mean(z_points_filtered), 3)
+                    logging.warning(f"No Thickness value found in metadata for {compID}. "
+                        f"Using average of non-negative OGP z_points: {report_thick}")
+                else:
+                    if comp_type == 'module': report_thick = 3.00
+                    else: report_thick = 1.70
                     logging.warning(f"No valid (non-negative) z_points found for {compID}.")
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              "weight_grams": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3), "flatness": np.round(metadata['Flatness'],3),
+                              "weight_grams": metadata.get('Weight', None), 'max_thickness': report_thick, "flatness": np.round(metadata['Flatness'],3),
                              'avg_thickness': report_thick, 'grade': grade((XOffset, YOffset), AngleOff)})
             if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
@@ -126,9 +136,13 @@ class SurveyProcessor():
         logging.debug(f"###### Generating Image for {compID} #######")
         
         im_bytes = plotter(**im_args)
+        
+        x_filtered = [x for i, x in enumerate(plotter.x_points) if i not in fd_indices]
+        y_filtered = [y for i, y in enumerate(plotter.y_points) if i not in fd_indices]
+        z_filtered = [z for i, z in enumerate(plotter.z_points) if i not in fd_indices]
 
-        db_upload.update({'x_points':(plotter.x_points).tolist(), 'y_points':(plotter.y_points).tolist(), 
-            'z_points':(plotter.z_points).tolist(),'hexplot':im_bytes, 'inspector': metadata['Operator'], 'comment':metadata.get("Comment", None)})
+        db_upload.update({'x_points':(x_filtered), 'y_points':(y_filtered), 
+            'z_points':(z_filtered),'hexplot':im_bytes, 'inspector': metadata['Operator'], 'comment':metadata.get("Comment", None)})
         
         db_upload.update(self.getDateTime(metadata))
 
@@ -147,7 +161,7 @@ class SurveyProcessor():
         last_successful_index = -1
         for idx, (ex_file, meta_file) in enumerate(zip(self.OGPSurveyFile, self.MetaFile)):
             try: 
-                db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
+                db_upload, comp_params, compID = await self.__getUploadData__(ex_file, meta_file, comp_type)
             except ValueMissingError as e:
                 logging.error(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
@@ -155,6 +169,9 @@ class SurveyProcessor():
                 logging.error(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
             self.print_db_msg(comp_type, compID)
+            if self.exclude_kwd is not None and self.exclude_kwd in compID.lower():
+                logging.info(f"Automatic dummy detections: Excluding {compID} from upload.")
+                continue
             status = await self.client.link_and_update_table(comp_params, db_upload)
             # status = await self.client.upload_PostgreSQL(comp_params, db_upload)
             if status == False:
@@ -162,8 +179,6 @@ class SurveyProcessor():
                 return False, last_successful_index
             last_successful_index = idx
         return True, last_successful_index  # Return True and last index if all files were processed successfully
-                # send2trash.send2trash(ex_file)
-            # print(f'Moved {ex_file} to recycle bin.')
         
     @staticmethod
     def print_db_msg(comp_type, modname):

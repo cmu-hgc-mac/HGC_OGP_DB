@@ -9,7 +9,9 @@ pjoin = os.path.join
 
 class InventoryUpdater():
     """Update the inventory of OGP results and upload new files to the database."""
-    def __init__(self, inventory_path, config_yaml, comp_type=''):
+    def __init__(self, inventory_path, config_yaml, comp_type='', dryrun=False):
+        self.dryrun = dryrun
+
         """Initialize the file uploader.
         
         Parameters
@@ -19,6 +21,7 @@ class InventoryUpdater():
         self.checkdir = self.config.get('ogp_survey_dir')
         self.parsed_dir = self.config.get('ogp_parsed_dir')
         self.comp_type = comp_type
+        self.dryrun = dryrun
         logging.debug(f"Reading inventory from: {self.inventory_p}")
         logging.debug(f"Parsing OGP survey files from directory: {self.checkdir}")
         logging.debug(f"Saving parsed data to directory: {self.parsed_dir}")
@@ -146,11 +149,20 @@ class InventoryUpdater():
 
         if choice == 'y':
             logging.info("Uploading all existing OGP results to database...")
-            await self.upload_files(txt_files_by_subdir)
-            return True
+
+            # --- DRY RUN PATCH ---
+            if self.dryrun:
+                logging.warning("[DRY RUN] Skipping upload of initial inventory.")
+                return True
+            # ----------------------
+
+            # Real upload
+            return await self.upload_files(txt_files_by_subdir)
+
         else:
             logging.info("Exiting...")
             return False
+
     
     def __check_inventory(self) -> tuple[dict, dict]:
         """Check for changes in the inventory of OGP results.
@@ -232,7 +244,21 @@ class InventoryUpdater():
                 except ParserKeyException as e:
                     sys.exit()
                 uploader = SurveyProcessor(gen_features, gen_meta, self.config)
-                success, indx = await uploader(subdir)
+                # Always run SurveyProcessor so tables and calculations happen
+                if self.dryrun:
+                    # Run SurveyProcessor ONCE to show geometry
+                    await uploader(subdir)
+
+                    logging.warning(f"[DRY RUN] Skipping upload for {subdir}.")
+                    success = True
+                    indx = len(files) - 1
+
+                else:
+                    # Normal mode: run SurveyProcessor ONCE and upload
+                    success, indx = await uploader(subdir)
+
+
+
 
                 successful_uploads = {}
                 if success:
@@ -253,10 +279,12 @@ class InventoryUpdater():
             else:
                 logging.warning(f"No files from {subdir} to process/upload to database.")
             
-        if invent:
+        # Only show upload summary in real mode
+        if invent and not self.dryrun:
             self.display_file_changes(invent, {}, successful_uploads)
-        
+
         return status
+
         
     def run_on_new_files(self, files, action):
         """Run the action on each file in the list of files
