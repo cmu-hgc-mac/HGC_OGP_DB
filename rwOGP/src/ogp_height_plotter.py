@@ -348,6 +348,32 @@ class PlotTool:
                 else:
                     table.add_row("Height Flag:", "Unknown or Dummy")
 
+            else:     # if protomodule,  flag thickness
+                layer, material = int(ComponentID[6]), ComponentID[7]
+                if layer == 1:
+                    if material == 'T':
+                        expected = 1.60
+                    elif material == 'W':
+                        expected = 2.00
+
+                elif layer == 2:
+                    if material == 'T':
+                        expected = 1.50
+                    elif material == 'W':
+                        expected = 1.90
+
+                elif layer == 3:
+                    if material == 'T':
+                        expected = 1.60
+                    elif material == 'W':
+                        expected = 2.00
+
+                if expected is not None:
+                    if sum(1 for z in z_points if z > (expected + 0.150)) >= 3:
+                        table.add_row("Height Flag:", "!! High Values !!")
+                else:
+                    table.add_row("Height Flag:", "Unknown or Dummy")
+
 
         CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
 

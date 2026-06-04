@@ -113,9 +113,19 @@ class SurveyProcessor():
                     if comp_type == 'module': report_thick = 3.00
                     else: report_thick = 1.70
                     logging.warning(f"No valid (non-negative) z_points found for {compID}.")
+
+            #print("Program is using the following values for Max and Average Thickness upload:", report_thick )
+            #print("Program could be using these values:" , z_points_filtered)
+            z_points_filtered = np.array(z_points_filtered)
+            Average_Thickness = (
+                np.round(np.mean(z_points_filtered), 3)
+                if z_points_filtered is not None and z_points_filtered.size > 0
+                else None
+            )
+
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               "weight_grams": metadata.get('Weight', None), 'max_thickness': report_thick, "flatness": np.round(metadata['Flatness'],3),
-                             'avg_thickness': report_thick, 'grade': grade((XOffset, YOffset), AngleOff)})
+                             'avg_thickness': Average_Thickness, 'grade': grade((XOffset, YOffset), AngleOff)})
             if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
                 SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
