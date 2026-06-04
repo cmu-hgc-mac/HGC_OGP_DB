@@ -284,7 +284,7 @@ def calc_five_angle(fdpoints, fd3to1, comp_type, is_second=False) -> float:
     elif comp_type == 'module':
         sign = -1 if is_second else 1
         #print("This is the Angle Function for LD5:", fd3to1, sign,  np.degrees(np.arctan2(sign * fd3to1[1], sign * fd3to1[0])))
-        return np.degrees(np.arctan2( sign * fd3to1[1], -1 * sign * fd3to1[0]))
+        return (np.degrees(np.arctan2( sign * fd3to1[1], -1 * sign * fd3to1[0])) * -1)
     
     #                       (   x,   y)       ( fd3to1[0], fd3to1[1]) )
 

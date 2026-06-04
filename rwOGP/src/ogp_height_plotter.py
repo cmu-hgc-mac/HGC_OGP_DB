@@ -390,6 +390,8 @@ class PlotTool:
         except (KeyError, TypeError) as e:
             raise ValueError(f"Invalid configuration for geometry={geometry}, density={density}, position={position}")
 
+        #table.add_row("Pin Angle", f"{angle_Pin:.5f}", "degrees")
+        #table.add_row("Tray Number", self.meta.get('TrayNo', 'Unknown'))
         AngleOffset = angle_FD - angle_Pin
 
         table.add_row("Angle Offset", f"{AngleOffset:.5f}", "degrees")
@@ -402,7 +404,7 @@ class PlotTool:
         
         if CenterOffset < -1.1*AngleOffset + 0.551:
             if CenterOffset < -9.74*AngleOffset + 0.274:
-                print("Placement", "Usable", "GREEN")
+                table.add_row("Placement", "Usable", "GREEN")
             else:
                 table.add_row("Placement", "Caution", "YELLOW")
         else: table.add_row("Placement", "!!RED FLAG!!", "RED")
